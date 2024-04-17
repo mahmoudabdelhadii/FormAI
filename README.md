@@ -86,24 +86,20 @@ npm start
 5. Start the client
 
 ```bash
-cd client
-npm start
+cd formai-Frontend
+npm run start
 ```
 
 
 ### Configuration
 
-Run the `admin_tool.sh` script from the server directory with permissions for executing the script. This script is used for configuring the admin account, creating the initial communities, and other settings.
-```bash
-./admin_tool.sh
-``` 
+
 
 #### `.env` Variables
 
 For email service of context-based authentication, the following variables are required:
 
 ```bash
-EMAIL=
-PASSWORD=
-EMAIL_SERVICE=
+DatabaseURL=
+
 ```
