@@ -1,5 +1,5 @@
 # FormAI-React-Native
- 
+ This is a work in progress, 
 
 There are three distinct user roles within the system:
 
@@ -11,19 +11,19 @@ There are three distinct user roles within the system:
 
 ## Features
 
-- [x] User authentication and authorization (JWT)
-- [x] User profile creation and management
-- [x] Post creation and management
+- [ ] User authentication and authorization (JWT)
+- [ ] User profile creation and management
+- [ ] Post creation and management
 - [ ] Instant Messgaging
 - [ ] Community leaderboards
-- [x] Commenting on posts
-- [x] Liking posts and comments
-- [x] Following/unfollowing users
-- [x] Reporting posts
-- [x] Context-based authentication
-- [x] Admin dashboard
-- [x] Moderator dashboard
-- [x] Email notifications
+- [ ] Commenting on posts
+- [ ] Liking posts and comments
+- [ ] Following/unfollowing users
+- [ ] Reporting posts
+- [ ] Context-based authentication
+- [ ] Admin dashboard
+- [ ] Moderator dashboard
+- [ ] Email notifications
 
 
 ## Technologies
@@ -61,7 +61,7 @@ Before running the application, make sure you have the following installed:
 1. Clone the repository
 
 ```bash
-git clone https://github.com/nz-m/SocialEcho.git
+git clone https://github.com/mahmoudabdelhadii//FormAI.git
 ```
 2. Go to the project directory and install dependencies for both the client and server
 
