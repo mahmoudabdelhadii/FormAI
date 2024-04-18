@@ -45,7 +45,11 @@ There are three distinct user roles within the system:
 
 ## Schema Diagram
 
-Here is the
+Here is the a link where you can view the data model in real time 
+https://dbdiagram.io/d/FormAI-Databases-65c3867aac844320aea782a4
+
+<img width="509" alt="image" src="https://github.com/mahmoudabdelhadii/FormAI/assets/56850296/cc5f868c-1571-4ff4-8410-88fc4faebef1">
+
 
 ## Getting Started
 
