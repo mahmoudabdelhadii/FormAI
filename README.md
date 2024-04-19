@@ -21,8 +21,6 @@ There are three distinct user roles within the system:
 - [ ] Following/unfollowing users
 - [ ] Reporting posts
 - [ ] Context-based authentication
-- [ ] Admin dashboard
-- [ ] Moderator dashboard
 - [ ] Email notifications
 
 
@@ -34,7 +32,6 @@ There are three distinct user roles within the system:
 - PrismaORM
 - TypeScript
 - Express.js
-- Tailwind CSS
 - JWT Authentication
 - Passport.js with salts
 - Nodemailer
