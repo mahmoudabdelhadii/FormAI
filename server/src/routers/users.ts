@@ -1,11 +1,19 @@
 import express from 'express';
+import generateConfirmationToken from "../utils/confirmationToken"
+import getCurrentContextData from "../utils/contextData"
+import {verifyEmailHTML, verifyLoginHTML} from "../utils/emailTemplates"
+import { encryptData, decryptData,} from "../utils/encryption"
+import formatCreatedAt from "../utils/timeConverter"
+
 const router = express.Router();
 
 router.get('/', function (req, res, next) {
-  res.send([
-    { name: "tj", title: "the man who created Express.js", github: "https://github.com/tj" },
-    { name: "Dalufishe", title: "haha! this is me", github: "https://github.com/Dalufishe" },
-  ]);
+
+
+  res.send(verifyEmailHTML("name", "verificationLink", "verificationCode"));
 });
+
+
+
 
 export default router;
