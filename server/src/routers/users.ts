@@ -10,7 +10,7 @@ const router = express.Router();
 router.get('/', function (req, res, next) {
 
 
-  res.send(verifyEmailHTML("name", "verificationLink", "verificationCode"));
+  res.send(getCurrentContextData(req));
 });
 
 

@@ -1,8 +1,7 @@
 import * as dotenv from 'dotenv';
 import {Strategy as JwtStrategy,StrategyOptions, ExtractJwt} from "passport-jwt";
 import passport from "passport";
-import PrismaClient from "../utils/PrismaClient"
-
+import prisma from "../utils/prisma"
 import * as jwt from "jsonwebtoken";
 dotenv.config();
 interface JwtOptions {
@@ -25,7 +24,7 @@ const opts: JwtOptions = {
 passport.use(
   new JwtStrategy(opts, async function (jwt_payload, done) {
     try {
-      const user = await PrismaClient.user.findFirst({
+      const user = await prisma.user.findFirst({
         where: {
           email: jwt_payload.email,
         }
@@ -35,7 +34,7 @@ passport.use(
     
       //findOne({ email: jwt_payload.email });
       if (user) {
-        const refreshTokenFromDB = await PrismaClient.token.findFirst({
+        const refreshTokenFromDB = await prisma.token.findFirst({
             where: {
           user: user.username,
             }

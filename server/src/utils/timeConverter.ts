@@ -6,10 +6,11 @@
  * formatCreatedAt("2023-04-18T13:22:43.115+00:00");
  * // returns "April 18th, 2023 7:22 PM"
  */
-const formatCreatedAt = (createdAt) => {
+
+const formatCreatedAt = (createdAt:string) => {
   const date = new Date(createdAt);
-  const options = { month: "long", day: "numeric", year: "numeric" };
-  const dateString = date.toLocaleDateString("en-US", options);
+  const options:Intl.DateTimeFormatOptions = { month: "long", day: "numeric", year: "numeric" };
+  const dateString = date.toLocaleDateString("en-US", options );
   const day = date.getDate();
   let suffix;
   if (day % 10 === 1 && day !== 11) {
