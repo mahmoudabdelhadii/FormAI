@@ -125,6 +125,11 @@ exports.Prisma.AdminScalarFieldEnum = {
   password: 'password'
 };
 
+exports.Prisma.RelationLoadStrategy = {
+  query: 'query',
+  join: 'join'
+};
+
 exports.Prisma.AdminTokenScalarFieldEnum = {
   id: 'id',
   user: 'user',
@@ -154,39 +159,20 @@ exports.Prisma.CommunityRequestScalarFieldEnum = {
   id: 'id',
   user: 'user',
   community: 'community',
-  isVerified: 'isVerified',
-  isRequested: 'isRequested'
+  verifiedAt: 'verifiedAt',
+  requestedAt: 'requestedAt'
 };
 
 exports.Prisma.ContextScalarFieldEnum = {
   id: 'id',
   user: 'user',
-  email: 'email',
   ip: 'ip',
   country: 'country',
   city: 'city',
-  browser: 'browser',
-  platform: 'platform',
   os: 'os',
   device: 'device',
   deviceType: 'deviceType',
   isTrusted: 'isTrusted'
-};
-
-exports.Prisma.LeaderboardScalarFieldEnum = {
-  id: 'id',
-  community: 'community',
-  tracking: 'tracking'
-};
-
-exports.Prisma.LeaderboardEntryScalarFieldEnum = {
-  id: 'id',
-  user: 'user',
-  community: 'community',
-  entryUrl: 'entryUrl',
-  verifiedBy: 'verifiedBy',
-  isVerified: 'isVerified',
-  rank: 'rank'
 };
 
 exports.Prisma.LikeScalarFieldEnum = {
@@ -197,7 +183,7 @@ exports.Prisma.LikeScalarFieldEnum = {
 
 exports.Prisma.LogScalarFieldEnum = {
   id: 'id',
-  email: 'email',
+  user: 'user',
   context: 'context',
   message: 'message',
   type: 'type',
@@ -227,7 +213,8 @@ exports.Prisma.PostScalarFieldEnum = {
 
 exports.Prisma.PreferencesScalarFieldEnum = {
   id: 'id',
-  user: 'user'
+  user: 'user',
+  enableContextBasedAuth: 'enableContextBasedAuth'
 };
 
 exports.Prisma.RelationshipScalarFieldEnum = {
@@ -254,6 +241,7 @@ exports.Prisma.TokenScalarFieldEnum = {
 };
 
 exports.Prisma.UserScalarFieldEnum = {
+  id: 'id',
   username: 'username',
   firstName: 'firstName',
   lastName: 'lastName',
@@ -266,7 +254,78 @@ exports.Prisma.UserScalarFieldEnum = {
   isEmailVerified: 'isEmailVerified',
   height: 'height',
   weight: 'weight',
-  id: 'id'
+  age: 'age',
+  communityId: 'communityId'
+};
+
+exports.Prisma.UserRolesScalarFieldEnum = {
+  id: 'id',
+  role: 'role'
+};
+
+exports.Prisma.EmailScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  verificationCode: 'verificationCode',
+  messageId: 'messageId',
+  for: 'for',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.EmailForScalarFieldEnum = {
+  id: 'id',
+  for: 'for'
+};
+
+exports.Prisma.LeaderboardScalarFieldEnum = {
+  id: 'id',
+  community: 'community'
+};
+
+exports.Prisma.LeaderboardSubmissionScalarFieldEnum = {
+  id: 'id',
+  user: 'user',
+  community: 'community',
+  entryUrl: 'entryUrl',
+  verifiedBy: 'verifiedBy',
+  weight: 'weight',
+  type: 'type',
+  verifiedAt: 'verifiedAt',
+  rank: 'rank'
+};
+
+exports.Prisma.LeaderboardSubmissionTypeScalarFieldEnum = {
+  id: 'id',
+  type: 'type'
+};
+
+exports.Prisma.PendingPostStatusScalarFieldEnum = {
+  id: 'id',
+  status: 'status'
+};
+
+exports.Prisma.LogLevelScalarFieldEnum = {
+  id: 'id',
+  level: 'level'
+};
+
+exports.Prisma.LogTypeScalarFieldEnum = {
+  id: 'id',
+  type: 'type'
+};
+
+exports.Prisma.SuspiciousLoginScalarFieldEnum = {
+  id: 'id',
+  user: 'user',
+  ip: 'ip',
+  country: 'country',
+  city: 'city',
+  os: 'os',
+  device: 'device',
+  deviceType: 'deviceType',
+  isTrusted: 'isTrusted',
+  unverifiedAttempts: 'unverifiedAttempts',
+  isBlocked: 'isBlocked'
 };
 
 exports.Prisma.SortOrder = {
@@ -293,8 +352,6 @@ exports.Prisma.ModelName = {
   Community: 'Community',
   CommunityRequest: 'CommunityRequest',
   Context: 'Context',
-  Leaderboard: 'Leaderboard',
-  LeaderboardEntry: 'LeaderboardEntry',
   Like: 'Like',
   Log: 'Log',
   PendingPost: 'PendingPost',
@@ -303,7 +360,17 @@ exports.Prisma.ModelName = {
   Relationship: 'Relationship',
   Report: 'Report',
   Token: 'Token',
-  User: 'User'
+  User: 'User',
+  UserRoles: 'UserRoles',
+  Email: 'Email',
+  EmailFor: 'EmailFor',
+  Leaderboard: 'Leaderboard',
+  LeaderboardSubmission: 'LeaderboardSubmission',
+  LeaderboardSubmissionType: 'LeaderboardSubmissionType',
+  PendingPostStatus: 'PendingPostStatus',
+  LogLevel: 'LogLevel',
+  LogType: 'LogType',
+  SuspiciousLogin: 'SuspiciousLogin'
 };
 
 /**

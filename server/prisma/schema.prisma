@@ -1,6 +1,7 @@
 generator client {
-  provider = "prisma-client-js"
-  output   = "../src/generated/client"
+  provider        = "prisma-client-js"
+  output          = "../src/generated/client"
+  previewFeatures = ["relationJoins"]
 }
 
 datasource db {
@@ -9,191 +10,271 @@ datasource db {
 }
 
 model Admin {
-  id       Int     @id @default(autoincrement())
-  username String? @db.VarChar
-  password String? @db.VarChar
+  id         Int         @id @default(autoincrement())
+  username   String?     @unique @db.VarChar
+  password   String?     @db.VarChar
+  AdminToken AdminToken?
 }
 
 model AdminToken {
   id          Int     @id @default(autoincrement())
-  user        String? @db.VarChar
+  user        String  @unique @db.VarChar
   accessToken String? @db.VarChar
+  Admin       Admin?  @relation(fields: [user], references: [username])
 }
 
 model BannedUsers {
   id        Int       @id @default(autoincrement())
   community Int
   user      String    @db.VarChar
-  Community Community @relation(fields: [community], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  User      User      @relation(fields: [user], references: [username], onDelete: NoAction, onUpdate: NoAction)
+  Community Community @relation(fields: [community], references: [id])
+  User      User      @relation(fields: [user], references: [username])
 }
 
 model Comment {
   id   Int     @id @default(autoincrement())
   body String? @db.VarChar
-  user String? @db.VarChar
-  post Int?
-  Post Post?   @relation(fields: [post], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user String  @db.VarChar
+  post Int
+  User User    @relation(fields: [user], references: [username])
+  Post Post    @relation(fields: [post], references: [id])
 }
 
 model Community {
-  id               Int                @id @default(autoincrement())
-  name             String?            @db.VarChar
-  description      String?            @db.VarChar
-  BannedUsers      BannedUsers[]
-  CommunityRequest CommunityRequest[]
-  Leaderboard      Leaderboard[]
-  LeaderboardEntry LeaderboardEntry[]
-  PendingPost      PendingPost[]
-  Post             Post[]
-  Report           Report[]
+  id                    Int                     @id @default(autoincrement())
+  name                  String?                 @db.VarChar
+  description           String?                 @db.VarChar
+  User                  User[]
+  BannedUsers           BannedUsers[]
+  CommunityRequest      CommunityRequest[]
+  PendingPost           PendingPost[]
+  Post                  Post[]
+  Report                Report[]
+  Leaderboard           Leaderboard[]
+  LeaderboardSubmission LeaderboardSubmission[]
 }
 
 model CommunityRequest {
   id          Int        @id @default(autoincrement())
   user        String?    @db.VarChar
   community   Int?
-  isVerified  Boolean?
-  isRequested Boolean?
-  Community   Community? @relation(fields: [community], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  User        User?      @relation(fields: [user], references: [username], onDelete: NoAction, onUpdate: NoAction)
+  verifiedAt  DateTime?  @db.Timestamp(6)
+  requestedAt DateTime?  @default(now()) @db.Timestamp(6)
+  User        User?      @relation(fields: [user], references: [username])
+  Community   Community? @relation(fields: [community], references: [id])
 }
 
 model Context {
   id         Int      @id @default(autoincrement())
   user       String?  @db.VarChar
-  email      String?  @db.VarChar
-  ip         String?  @db.VarChar
-  country    String?  @db.VarChar
-  city       String?  @db.VarChar
-  browser    String?  @db.VarChar
-  platform   String?  @db.VarChar
-  os         String?  @db.VarChar
-  device     String?  @db.VarChar
-  deviceType String?  @db.VarChar
+  ip         String?
+  country    String?
+  city       String?
+  os         String?
+  device     String?
+  deviceType String?
   isTrusted  Boolean?
-  User       User?    @relation(fields: [user], references: [username], onDelete: NoAction, onUpdate: NoAction)
+  User       User?    @relation(fields: [user], references: [username])
+  Log        Log[]
+}
+
+model Like {
+  id   Int    @id @default(autoincrement())
+  user String @db.VarChar
+  post Int
+  User User   @relation(fields: [user], references: [username])
+  Post Post   @relation(fields: [post], references: [id])
+}
+
+model Log {
+  id        Int       @id @default(autoincrement())
+  user      String?   @db.VarChar
+  context   Int?
+  message   String?
+  type      Int?
+  level     Int?
+  timestamp DateTime? @default(now())
+  User      User?     @relation(fields: [user], references: [username])
+  Context   Context?  @relation(fields: [context], references: [id])
+  LogType   LogType?  @relation(fields: [type], references: [id])
+  LogLevel  LogLevel? @relation(fields: [level], references: [id])
+}
+
+model PendingPost {
+  id                Int                @id @default(autoincrement())
+  Content           String?
+  fileUrl           String
+  community         Int
+  user              String
+  caption           String?
+  status            Int?
+  confirmationToken String?
+  PendingPostStatus PendingPostStatus? @relation(fields: [status], references: [id])
+  User              User?              @relation(fields: [user], references: [username])
+  Community         Community?         @relation(fields: [community], references: [id])
+}
+
+model Post {
+  id        Int        @id @default(autoincrement())
+  Content   String?
+  fileUrl   String
+  community Int
+  user      String
+  caption   String?
+  Community Community? @relation(fields: [community], references: [id])
+  User      User?      @relation(fields: [user], references: [username])
+  Comment   Comment[]
+  Like      Like[]
+  Report    Report[]
+}
+
+model Preferences {
+  id                     Int      @id @default(autoincrement())
+  user                   String?  @db.VarChar
+  enableContextBasedAuth Boolean?
+  User                   User?    @relation(fields: [user], references: [username])
+}
+
+model Relationship {
+  id        Int    @id @default(autoincrement())
+  follower  String @db.VarChar
+  following String @db.VarChar
+  //Follower  User?   @relation(name: "Follower", fields: [follower], references: [username])
+  //Following User?   @relation(name: "Following", fields: [following], references: [username])
+}
+
+model Report {
+  id           Int       @id @default(autoincrement())
+  reportedBy   String    @db.VarChar
+  post         Int
+  community    Int
+  reportReason String?
+  reportDate   DateTime? @default(now())
+  User         User      @relation(fields: [reportedBy], references: [username])
+  Post         Post      @relation(fields: [post], references: [id])
+  Community    Community @relation(fields: [community], references: [id])
+}
+
+model Token {
+  id           Int       @id @default(autoincrement())
+  user         String    @db.VarChar
+  refreshToken String?
+  accessToken  String?
+  createdAt    DateTime? @default(now())
+  User         User      @relation(fields: [user], references: [username])
+}
+
+model User {
+  id                    Int                     @default(autoincrement())
+  username              String                  @id @unique @db.VarChar
+  firstName             String                  @db.VarChar
+  lastName              String                  @db.VarChar
+  email                 String                  @unique @db.VarChar
+  password              String                  @db.VarChar
+  avatarUrl             String?                 @db.VarChar
+  bio                   String?                 @db.VarChar
+  role                  Int?
+  createdAt             DateTime?               @default(now())
+  isEmailVerified       Boolean?                @default(false)
+  height                Float?
+  weight                Float?
+  age                   Int?
+  UserRoles             UserRoles?              @relation(fields: [role], references: [id])
+  BannedUsers           BannedUsers[]
+  Comment               Comment[]
+  CommunityRequest      CommunityRequest[]
+  Context               Context[]
+  Like                  Like[]
+  Log                   Log[]
+  PendingPost           PendingPost[]
+  Post                  Post[]
+  Preferences           Preferences[]
+  Report                Report[]
+  Token                 Token[]
+  LeaderboardSubmission LeaderboardSubmission[]
+  SuspiciousLogin       SuspiciousLogin[]
+  Community             Community?              @relation(fields: [communityId], references: [id])
+  communityId           Int?
+}
+
+model UserRoles {
+  id   Int     @id
+  role String?
+  User User[]
+}
+
+model Email {
+  id               Int       @id @default(autoincrement())
+  email            String?   @db.VarChar
+  verificationCode String?   @db.VarChar
+  messageId        String?   @db.VarChar
+  for              Int?
+  createdAt        DateTime? @default(now())
+  EmailFor         EmailFor? @relation(fields: [for], references: [id])
+}
+
+model EmailFor {
+  id    Int     @id
+  for   String?
+  Email Email[]
 }
 
 model Leaderboard {
   id        Int       @id @default(autoincrement())
   community Int
-  tracking  String?   @db.VarChar
-  Community Community @relation(fields: [community], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Community Community @relation(fields: [community], references: [id])
 }
 
-model LeaderboardEntry {
-  id         Int        @id @default(autoincrement())
-  user       String?    @db.VarChar
-  community  Int?
-  entryUrl   String?    @db.VarChar
-  verifiedBy Int?
-  isVerified Boolean?
-  rank       Int?
-  Community  Community? @relation(fields: [community], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  User       User?      @relation(fields: [user], references: [username], onDelete: NoAction, onUpdate: NoAction)
+model LeaderboardSubmission {
+  id                        Int                        @id @default(autoincrement())
+  user                      String?                    @db.VarChar
+  community                 Int?
+  entryUrl                  String?
+  verifiedBy                Int?
+  weight                    String?
+  type                      Int?
+  verifiedAt                DateTime?
+  rank                      Int?
+  User                      User?                      @relation(fields: [user], references: [username])
+  Community                 Community?                 @relation(fields: [community], references: [id])
+  LeaderboardSubmissionType LeaderboardSubmissionType? @relation(fields: [type], references: [id])
 }
 
-model Like {
-  id   Int     @id @default(autoincrement())
-  user String? @db.VarChar
-  post Int?
+model LeaderboardSubmissionType {
+  id                    Int                     @id
+  type                  String?
+  LeaderboardSubmission LeaderboardSubmission[]
 }
 
-model Log {
-  id        Int       @id @default(autoincrement())
-  email     String?   @db.VarChar
-  context   String?   @db.VarChar
-  message   String?   @db.VarChar
-  type      String?   @db.VarChar
-  level     String?   @db.VarChar
-  timestamp DateTime? @db.Timestamp(6)
+model PendingPostStatus {
+  id          Int           @id
+  status      String?
+  PendingPost PendingPost[]
 }
 
-model PendingPost {
-  id                Int        @id @default(autoincrement())
-  Content           String?    @db.VarChar
-  fileUrl           String?    @db.VarChar
-  community         Int?
-  user              String?    @db.VarChar
-  caption           String?    @db.VarChar
-  status            String?    @db.VarChar
-  confirmationToken String?    @db.VarChar
-  Community         Community? @relation(fields: [community], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  User              User?      @relation(fields: [user], references: [username], onDelete: NoAction, onUpdate: NoAction)
+model LogLevel {
+  id    Int     @id
+  level String?
+  Log   Log[]
 }
 
-model Post {
-  id        Int        @id @default(autoincrement())
-  Content   String?    @db.VarChar
-  fileUrl   String?    @db.VarChar
-  community Int?
-  user      String?    @db.VarChar
-  caption   String?    @db.VarChar
-  Comment   Comment[]
-  Community Community? @relation(fields: [community], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  User      User?      @relation(fields: [user], references: [username], onDelete: NoAction, onUpdate: NoAction)
-  Report    Report[]
+model LogType {
+  id   Int     @id
+  type String?
+  Log  Log[]
 }
 
-model Preferences {
-  id   Int     @id @default(autoincrement())
-  user String? @db.VarChar
-  User User?   @relation(fields: [user], references: [username], onDelete: NoAction, onUpdate: NoAction)
-}
-
-model Relationship {
-  id                                Int     @id @default(autoincrement())
-  follower                          String? @db.VarChar
-  following                         String? @db.VarChar
-  User_Relationship_followerToUser  User?   @relation("Relationship_followerToUser", fields: [follower], references: [username], onDelete: NoAction, onUpdate: NoAction)
-  User_Relationship_followingToUser User?   @relation("Relationship_followingToUser", fields: [following], references: [username], onDelete: NoAction, onUpdate: NoAction)
-}
-
-model Report {
-  id           Int        @id @default(autoincrement())
-  reportedBy   String?    @db.VarChar
-  post         Int?
-  community    Int?
-  reportReason String?    @db.VarChar
-  reportDate   DateTime?  @db.Timestamp(6)
-  Community    Community? @relation(fields: [community], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  Post         Post?      @relation(fields: [post], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  User         User?      @relation(fields: [reportedBy], references: [username], onDelete: NoAction, onUpdate: NoAction)
-}
-
-model Token {
-  id           Int       @id @default(autoincrement())
-  user         String?   @db.VarChar
-  refreshToken String    @db.VarChar
-  accessToken  String    @db.VarChar
-  createdAt    DateTime? @db.Timestamp(6)
-  User         User?     @relation(fields: [user], references: [username], onDelete: NoAction, onUpdate: NoAction)
-}
-
-model User {
-  username                                  String             @id @db.VarChar
-  firstName                                 String?            @db.VarChar
-  lastName                                  String?            @db.VarChar
-  email                                     String?            @unique(map: "unique_email_constraint") @db.VarChar
-  password                                  String?            @db.VarChar
-  avatarUrl                                 String?            @db.VarChar
-  bio                                       String?            @db.VarChar
-  role                                      String?            @db.VarChar
-  createdAt                                 DateTime?          @db.Timestamp(6)
-  isEmailVerified                           Boolean?
-  height                                    Float?
-  weight                                    Float?
-  id                                        Int                @default(autoincrement())
-  BannedUsers                               BannedUsers[]
-  CommunityRequest                          CommunityRequest[]
-  Context                                   Context[]
-  LeaderboardEntry                          LeaderboardEntry[]
-  PendingPost                               PendingPost[]
-  Post                                      Post[]
-  Preferences                               Preferences[]
-  Relationship_Relationship_followerToUser  Relationship[]     @relation("Relationship_followerToUser")
-  Relationship_Relationship_followingToUser Relationship[]     @relation("Relationship_followingToUser")
-  Report                                    Report[]
-  Token                                     Token[]
+model SuspiciousLogin {
+  id                 Int      @id @default(autoincrement())
+  user               String?  @db.VarChar
+  ip                 String?
+  country            String?
+  city               String?
+  os                 String?
+  device             String?
+  deviceType         String?
+  isTrusted          Boolean?
+  unverifiedAttempts Int?
+  isBlocked          Boolean?
+  User               User?    @relation(fields: [user], references: [username])
 }
