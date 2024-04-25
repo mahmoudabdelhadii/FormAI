@@ -1,7 +1,9 @@
 
-server/node_modules/*
-/server/node_modules/
-
+/server/node_modules/*
+/server/node_modules
+/app/node_modules
+server/dist/*
+server/dist
 # Local .terraform directories
 **/.terraform/*
 
