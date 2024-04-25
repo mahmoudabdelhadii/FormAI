@@ -1,6 +1,7 @@
 
 import type { Request, Response } from 'express';
 import prisma from "../utils/prisma"
+import { equal } from 'assert';
 
 const getCommunities = async (req:Request, res:Response) => {
     try {
@@ -15,38 +16,72 @@ const getCommunities = async (req:Request, res:Response) => {
     try {
       const { communityId } = req.params;
       const community = await prisma.community.findFirst({
+        relationLoadStrategy: 'join', 
         where: {
           id: parseInt(communityId),
+          
+        },
+        include: {
+          CommunityRequest: {
+            select:{
+              id: true,
+            user: true,
+            requestedAt: true,
+            message: true 
+            }
+          },
+          CommunityUser:{
+            select:{
+              user:true,
+              verifiedAt: true,
+              UserRoles:{
+                select: {
+                    role:true
+                }
+              },
+            }
+          },
+          BannedUsers:true,
+    
         },
         
       })
-
-
-        
-  
       if (!community) {
         return res.status(404).json({ message: "Community not found" });
       }
 
-  
-      const moderatorCount = community.moderators.length;
-      const memberCount = community.members.length;
-      const formattedCommunity = {
-        ...community,
-        memberCount,
-        moderatorCount,
-      };
-      res.status(200).json(formattedCommunity);
+      
+       const moderatorCount = community.CommunityUser
+      // const memberCount = community.members.length;
+      // const formattedCommunity = {
+      //   ...community,
+      //   memberCount,
+      //   moderatorCount,
+      // };
+      res.status(200).json(community);
     } catch (error) {
       res.status(500).json({ message: "Error retrieving community" });
     }
   };
   
   const getModerators = async (req:Request, res:Response) => {
+    
     try {
-      const moderators = await prisma.user.findMany({ role: "moderator" }).select(
-        "_id name email"
-      );
+      const { communityId } = req.params;
+      const moderators = await prisma.communityUser.findMany({
+        where: {
+          community: parseInt(communityId), 
+          role: 2
+        },
+        include:{
+          UserRoles: {
+            select: {
+              role: true,
+            },
+          }
+        }
+
+      })
       res.status(200).json(moderators);
     } catch (error) {
       res.status(500).json({ message: "Error retrieving moderators" });
@@ -55,50 +90,64 @@ const getCommunities = async (req:Request, res:Response) => {
   const addModerator = async (req:Request, res:Response) => {
     try {
       const { communityId, moderatorId } = req.query;
-      const community = await prisma.community.findById(communityId);
+
+      if (!communityId){
+        return res.status(404).json({ message: "no community id provided" });
+      }
+      const community = await prisma.communityUser.findMany({
+        where:{
+          community: parseInt(communityId.toString()),
+          role: 2
+        },
+        select:{
+          user:true
+        }
+      });
       if (!community) {
         return res.status(404).json({ message: "Community not found" });
       }
-      const existingModerator = community.moderators.find(
-        (mod) => mod.toString() === moderatorId
-      );
+      const existingModerator = community
+
+      console.log(existingModerator)
       if (existingModerator) {
-        return res.status(400).json({ message: "Already a moderator" });
+        return res.status(400).json(community);
       }
-      community.moderators.push(moderatorId);
-      community.members.push(moderatorId);
-      await community.save();
-      res.status(200).json({ message: "Moderator added" });
+      // community.moderators.push(moderatorId);
+      // community.members.push(moderatorId);
+      // await community.save();
+      res.status(200).json({ message: "Moderator added!" });
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: "Error adding moderator" });
     }
   };
   
-  const removeModerator = async (req:Request, res:Response) => {
-    try {
-      const { communityId, moderatorId } = req.query;
+  // const removeModerator = async (req:Request, res:Response) => {
+  //   try {
+  //     const { communityId, moderatorId } = req.query;
   
-      const community = await prisma.community.findById(communityId);
-      if (!community) {
-        return res.status(404).json({ message: "Community not found" });
-      }
-      const existingModerator = community.moderators.find(
-        (mod) => mod.toString() === moderatorId
-      );
-      if (!existingModerator) {
-        return res.status(400).json({ message: "Not a moderator" });
-      }
-      community.moderators = community.moderators.filter(
-        (mod) => mod.toString() !== moderatorId
-      );
-      community.members = community.members.filter(
-        (mod) => mod.toString() !== moderatorId
-      );
+  //     const community = await prisma.community.findById(communityId);
+  //     if (!community) {
+  //       return res.status(404).json({ message: "Community not found" });
+  //     }
+  //     const existingModerator = community.moderators.find(
+  //       (mod) => mod.toString() === moderatorId
+  //     );
+  //     if (!existingModerator) {
+  //       return res.status(400).json({ message: "Not a moderator" });
+  //     }
+  //     community.moderators = community.moderators.filter(
+  //       (mod) => mod.toString() !== moderatorId
+  //     );
+  //     community.members = community.members.filter(
+  //       (mod) => mod.toString() !== moderatorId
+  //     );
   
-      await community.save();
-      res.status(200).json({ message: "Moderator removed" });
-    } catch (error) {
-      res.status(500).json({ message: "Error removing moderator" });
-    }
-  };
+  //     await community.save();
+  //     res.status(200).json({ message: "Moderator removed" });
+  //   } catch (error) {
+  //     res.status(500).json({ message: "Error removing moderator" });
+  //   }
+  // };
+
+  export {getCommunities,getCommunity,getModerators,addModerator}

@@ -3,10 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "ts-node-esm ./src/index.ts",
-    "dev": "nodemon",
-    "build": "tsc",
+    "dev": "ts-node-dev --poll src/index.ts",
+    "build": "rimraf ./dist && tsc",
     "serve": "node dist/index.js",
+    "start": "npm run build && npm run serve",
     "prisma:pull": "npx prisma db pull",
     "prisma:gen": "npx prisma generate"
   },
@@ -49,9 +49,10 @@
     "@types/passport-jwt": "^4.0.1",
     "@types/request-ip": "^0.0.41",
     "gen-express-app": "^0.2.5",
-    "nodemon": "^3.0.1",
     "prisma": "^5.12.1",
+    "rimraf": "^5.0.5",
     "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
     "tsx": "^4.7.2",
     "typescript": "^5.4.5"
   }

@@ -1,4 +1,4 @@
-import { PrismaClient } from '../generated/client'
+import { PrismaClient } from '@prisma/client'
 import UserSchema from '../models/user.model'
 const prisma = new PrismaClient().$extends({
     query: {
