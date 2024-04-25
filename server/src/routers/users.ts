@@ -4,16 +4,14 @@ import getCurrentContextData from "../utils/contextData"
 import {verifyEmailHTML, verifyLoginHTML} from "../utils/emailTemplates"
 import { encryptData, decryptData,} from "../utils/encryption"
 import formatCreatedAt from "../utils/timeConverter"
-
+import {getCommunity,getCommunities,getModerators,addModerator} from '../controllers/admin.controller'
 const router = express.Router();
 
-router.get('/', function (req, res, next) {
+router.get("/community/:communityId", getCommunity);
+router.get("/communities", getCommunities);
 
 
-  res.send(getCurrentContextData(req));
-});
+router.get("/moderators/:communityId", getModerators);
 
-
-
-
+router.patch("/add-moderators", addModerator);
 export default router;
