@@ -4,6 +4,11 @@
 /app/node_modules
 server/dist/*
 server/dist
+
+server/.env
+server/.env.development
+.env
+.env.development
 # Local .terraform directories
 **/.terraform/*
 
