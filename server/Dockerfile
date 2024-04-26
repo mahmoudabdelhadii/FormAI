@@ -29,4 +29,6 @@ COPY --from=development usr/src/server/dist ./dist
 
 RUN npm run prisma:gen
 
+EXPOSE 8080
+
 CMD ["node","dist/index.js"]

@@ -9,7 +9,7 @@ services:
     - ./:/usr/src/server
     - /usr/src/server/node_modules
     ports:
-    - 3000:3000
+    - 8080:8080
     env_file:
     - ./.env.development
     command: npm run dev
