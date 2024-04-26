@@ -14,7 +14,7 @@ env:
 
 jobs:
   deploy-infra:
-    runs-on: linux-latest
+    runs-on: ubuntu-latest
     steps: 
     - name: checkout
       uses: actions/checkout@v2
@@ -26,6 +26,10 @@ jobs:
       id: init
       run: terraform init -backend-config="bucket=$TF_STATE_BUCKET_NAME" -backend-config="region=$AWS_REGION"
       working-directory: ./terraform
+
+    - name: Terraform Validate
+      id: validate
+      uses: hashicorp/terraform-github-actions/validate@v0.3.7
     - name: Terraform plan
       id: plan
       run: |-
