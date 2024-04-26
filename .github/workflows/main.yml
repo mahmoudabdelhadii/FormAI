@@ -72,10 +72,10 @@ jobs:
         working-directory: ./server
       - name: Deploy docker image to EC2
         env:
-          REGISTRY: "${{ steps.login-ecr.outputs.registry }}"
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: formai
           IMAGE_TAG: ${{ github.sha }}
-          AWS_DEFAULT_REGION: $AWS_REGION
+          AWS_DEFAULT_REGION: $${{AWS_REGION}}
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ env.SERVER_PUBLIC_IP }}
