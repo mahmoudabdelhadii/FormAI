@@ -1,6 +1,9 @@
 terraform {
     required_providers {
-      aws = "hashicorp/aws"
+      aws={
+      source = "hashicorp/aws"
+      version = "~>5.0"
+      }
     }
     backend "s3" {
       key = "aws/ec2-deploy/terraform.tfstate"
