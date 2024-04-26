@@ -9,7 +9,7 @@ env:
   TF_STATE_BUCKET_NAME: ${{secrets.AWS_BUCKET_NAME}}
   PRIVATE_SSH_KEY: ${{ secrets.AWS_SSH_KEY_PRIVATE }}
   PUBLIC_SSH_KEY: ${{ secrets.AWS_SSH_KEY_PUBLIC }}
-  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_REGION: us-east-1
 
 jobs:
   deploy-infra:
@@ -25,7 +25,7 @@ jobs:
         terraform_wrapper: false
     - name: Terraform init
       id: init
-      run: terraform init -backend-config="bucket=$TF_STATE_BUCKET_NAME" -backend-config="region=$AWS_REGION"
+      run: terraform init -backend-config="bucket=$TF_STATE_BUCKET_NAME" -backend-config="region=us-east-1"
       working-directory: ./terraform
 
     - name: Terraform Validate
@@ -35,7 +35,7 @@ jobs:
       id: plan
       run: |-
         terraform plan \
-        -var="region=$AWS_REGION" \
+        -var="region=us-east-1" \
         -var="public_key=$PUBLIC_SSH_KEY" \
         -var="private_key=$PRIVATE_SSH_KEY" \
         -var="key_name=deployer-key" \
@@ -66,7 +66,6 @@ jobs:
           REGISTRY: "${{ steps.login-ecr.outputs.registry }}"
           REPOSITORY: formai
           IMAGE_TAG: ${{ github.sha }}
-          AWS_DEFAULT_REGION: us-east-1
         run: |-
           docker build -t $REGISTRY:$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY:$REPOSITORY:$IMAGE_TAG
@@ -87,7 +86,7 @@ jobs:
             sudo apt update 
             sudo apt install docker.io -y
             sudo apt install awscli -y
-            sudo ${aws ecr get-login --no-include-email --region $AWS_REGION}
+            sudo $(aws ecr get-login --no-include-email --region us-east-1)
             sudo docker stop myappcontainer || true
             sudo docker rm  myappcontainer || true
             sudo docker pull "$REGISTRY:$REPOSITORY:$IMAGE_TAG"
