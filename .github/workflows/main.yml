@@ -63,7 +63,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
       - name: Build, Push docker image
         env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REGISTRY: "${{ steps.login-ecr.outputs.registry }}"
           REPOSITORY: formai
           IMAGE_TAG: ${{ github.sha }}
         run: |-
@@ -72,7 +72,7 @@ jobs:
         working-directory: ./server
       - name: Deploy docker image to EC2
         env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REGISTRY: "${{ steps.login-ecr.outputs.registry }}"
           REPOSITORY: formai
           IMAGE_TAG: ${{ github.sha }}
           AWS_DEFAULT_REGION: $AWS_REGION
@@ -89,7 +89,7 @@ jobs:
             sudo ${aws ecr get-login --no-include-email --region $AWS_REGION}
             sudo docker stop myappcontainer || true
             sudo docker rm  myappcontainer || true
-            sudo docker pull $REGISTRY:$REPOSITORY:$IMAGE_TAG
+            sudo docker pull "$REGISTRY:$REPOSITORY:$IMAGE_TAG"
             sudo docker run -d --name myappcontainer -p 80:8080 $REGISTRY:$REPOSITORY:$IMAGE_TAG
 
 
