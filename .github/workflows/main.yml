@@ -64,7 +64,7 @@ jobs:
       - name: Build, Push docker image
         env:
           REGISTERY: ${{ steps.login-ecr.outputs.registery }}
-          REPOSITORY: FormAI
+          REPOSITORY: formai
           IMAGE_TAG: ${{ github.sha }}
         run: |-
           docker build -t $REGISTERY:$REPOSITORY:$IMAGE_TAG .
