@@ -44,7 +44,6 @@ resource "aws_security_group" "maingroup" {
         ipv6_cidr_blocks = []
         protocol = "-1"
         security_groups = []
-        prefix_list_ids = []
         self = false
         to_port = 0
         }
@@ -66,7 +65,6 @@ resource "aws_security_group" "maingroup" {
         ipv6_cidr_blocks = []
         protocol = "tcp"
         security_groups = []
-        prefix_list_ids = []
         self = false
         to_port = 80
         }
@@ -81,6 +79,7 @@ resource "aws_key_pair" "deployer" {
 
 
 output "instance_public_ip" {
+  description = "Public IP of EC2 instance"
   value = aws_instance.server.public_ip
-  sensitive = false
+  sensitive = true
 }
