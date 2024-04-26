@@ -13,7 +13,7 @@ provider "aws" {
     region = var.region
 }
 resource "aws_instance" "server" {
-  ami = "ami-04e5276ebb8451442"
+  ami = "ami-04b70fa74e45c3917"
   instance_type = "t2.micro"
   key_name = aws_key_pair.deployer.key_name
   vpc_security_group_ids = [aws_security_group.maingroup.id]
@@ -87,4 +87,5 @@ output "instance_public_ip" {
   description = "Public IP of EC2 instance"
   value = aws_instance.server.public_ip
   sensitive = true
+  
 }
