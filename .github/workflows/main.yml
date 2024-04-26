@@ -74,7 +74,7 @@ jobs:
           REPOSITORY: FormAI
           IMAGE_TAG: ${{ github.sha }}
           AWS_DEFAULT_REGION: $AWS_REGION
-        uses: appleboy/ssh-actions@master
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ env.SERVER_PUBLIC_IP }}
           username: ubuntu
