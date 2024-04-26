@@ -46,7 +46,7 @@ jobs:
       run: terraform apply PLAN
       working-directory: ./terraform
     - name: Set output
-      id: set ip
+      id: set-ip
       run: |-
         echo ":: set-output name=instace_public_ip::${terraform output instance_public_ip}"
 
