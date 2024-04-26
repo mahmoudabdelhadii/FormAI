@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import {Prisma} from '@prisma/client'
+import {Prisma} from '../generated/client'
 const UserSchema = z.object({
   id: z.number().int(), // Automatically incremented, typically not provided in payload
   username: z.string().trim().min(3, "Username must be at least 3 characters long").max(20, "Username must be no more than 20 characters long").refine(value => /^[a-zA-Z0-9]+$/.test(value), {

@@ -5,6 +5,7 @@
 server/dist/*
 server/dist
 
+server/src/generated/*
 server/.env
 server/.env.development
 .env
