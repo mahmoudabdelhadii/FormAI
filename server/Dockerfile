@@ -25,8 +25,6 @@ COPY package*.json .
 
 RUN npm ci --only=production
 
-COPY prisma ./prisma/
-
 COPY --from=development usr/src/server/dist ./dist
 
 RUN npm run prisma:gen
