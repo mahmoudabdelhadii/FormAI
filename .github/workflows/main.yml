@@ -15,7 +15,7 @@ jobs:
   deploy-infra:
     runs-on: ubuntu-latest
     outputs:
-      SERVER_PUBLIC_IP: ${{steps.set-ip.outputs.instance_public_ip}}
+      SERVER_PUBLIC_IP: ${{ steps.set-ip.outputs.instance_public_ip}}
     steps: 
     - name: checkout
       uses: actions/checkout@v4
@@ -86,7 +86,7 @@ jobs:
             sudo apt update 
             sudo apt install docker.io -y
             sudo apt install awscli -y
-            sudo $(aws ecr get-login --no-include-email --region us-east-1)
+            sudo $(aws ecr get-login-password --region us-east-1) | docker login --username AWS --password-stdin 637423485999.dkr.ecr.us-east-1.amazonaws.com
             sudo docker stop myappcontainer || true
             sudo docker rm  myappcontainer || true
             sudo docker pull "$REGISTRY/$REPOSITORY:$IMAGE_TAG"
