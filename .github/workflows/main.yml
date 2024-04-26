@@ -15,7 +15,7 @@ jobs:
   deploy-infra:
     runs-on: ubuntu-latest
     outputs:
-      SERVER_PUBLIC_IP: ${{ steps.set-ip.outputs.instance_public_ip }}
+      SERVER_PUBLIC_IP: ${{ steps.set-ip.outputs.instance_public_ip}}
     steps: 
     - name: checkout
       uses: actions/checkout@v4
@@ -48,8 +48,7 @@ jobs:
     - name: Set output
       id: set-ip
       run: |-
-        echo "::set-output name=instance_public_ip::$(terraform output instance_public_ip)" \
-        && terraform output instance_public_ip
+        echo "::set-output name=instance_public_ip::$(terraform output instance_public_ip)"
 
   deploy-app:
     runs-on: ubuntu-latest
@@ -81,7 +80,7 @@ jobs:
         with:
           host: ${{ env.SERVER_PUBLIC_IP }}
           username: ubuntu
-          password: ${{ env.PRIVATE_SSH_KEY }}
+          key: ${{ env.PRIVATE_SSH_KEY }}
           envs: PRIVATE_SSH_KEY,REGISTRY,REPOSITORY,IMAGE_TAG,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_REGION,AWS_DEFAULT_REGION
           scripts: |-
             sudo apt update 
