@@ -6,7 +6,7 @@ import { dirname } from "dirname-filename-esm";
 import requestIp from 'request-ip';
 import usersRouter from "./routers/users";
 
-const port = process.env.PORT || 3000
+const port = process.env.NODE_PORT || 3000
 
 // app
 const app: Application = express();
