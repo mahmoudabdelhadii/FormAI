@@ -90,7 +90,7 @@ jobs:
             unzip awscliv2.zip
             sudo ./aws/install
             sudo apt-get install docker.io -y
-            sudo $(aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 637423485999.dkr.ecr.us-east-1.amazonaws.com/formai)
+            sudo $(aws ecr get-login-password --region us-east-1) | sudo docker login --username AWS --password-stdin 637423485999.dkr.ecr.us-east-1.amazonaws.com/formai
             sudo docker stop myappcontainer || true
             sudo docker rm  myappcontainer || true
             sudo docker pull "$REGISTRY/$REPOSITORY:$IMAGE_TAG"
