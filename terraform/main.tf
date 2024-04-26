@@ -44,7 +44,8 @@ resource "aws_security_group" "maingroup" {
         ipv6_cidr_blocks = []
         protocol = "-1"
         security_groups = []
-        prefix_list_ids = [""]
+        prefix_list_ids = []
+        security_groups  = []
         self = false
         to_port = 0
         }
@@ -56,7 +57,8 @@ resource "aws_security_group" "maingroup" {
         ipv6_cidr_blocks = []
         protocol = "tcp"
         security_groups = []
-        prefix_list_ids = ["",]
+        prefix_list_ids = []
+        security_groups  = []
         self = false
         to_port = 22
         },
@@ -66,7 +68,8 @@ resource "aws_security_group" "maingroup" {
         ipv6_cidr_blocks = []
         protocol = "tcp"
         security_groups = []
-        prefix_list_ids = ["",]
+        prefix_list_ids = []
+        security_groups  = []
         self = false
         to_port = 80
         }
