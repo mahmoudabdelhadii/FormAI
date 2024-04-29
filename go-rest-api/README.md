@@ -1,6 +1,3 @@
-# go-rest-boilerplate
-
-A great starting point for building RESTful APIs in Go using Gin framework, and sqlx for connecting to a PostgreSQL database. The implementation follows Clean Architecture principles as described by Uncle Bob.
 
 ### Features
 
