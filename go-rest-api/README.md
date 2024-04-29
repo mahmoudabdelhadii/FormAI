@@ -17,16 +17,6 @@
 -   Go version 1.17 or higher
 -   PostgreSQL version 9.1 or higher
 
-To get up and running with the Go-REST-Boilerplate, follow these simple steps:
-
-```
-$ git clone https://github.com/snykk/go-rest-boilerplate.git
-$ cd go-rest-boilerplate
-$ cp internal/config/.env.example internal/config/.env # create a copy of the example environment file, and also follow configuration steps on the difference section below
-$ go build -o go-rest-boilerplate.out cmd/api/main.go
-$ ./go-rest-boilerplate.out
-```
-
 #### Configuration
 
 The application can be configured using environment variables to fit your specific needs. A sample environment file is provided as .env.example with the following variables available for customization:
