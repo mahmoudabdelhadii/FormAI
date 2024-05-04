@@ -78,8 +78,6 @@ jobs:
           sudo apt update && sudo apt install vlt -y
           export HCP_CLIENT_ID=$HCP_CLIENT_ID
           export HCP_CLIENT_SECRET=$HCP_CLIENT_SECRET
-          vlt login
-          vlt config init
           vlt secrets list
           # Use curl or vault CLI to authenticate and retrieve secrets
         env:
