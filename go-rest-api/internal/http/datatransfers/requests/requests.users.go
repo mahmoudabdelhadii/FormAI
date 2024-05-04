@@ -17,7 +17,7 @@ func (user UserRequest) ToV1Domain() *V1Domains.UserDomain {
 		Username: user.Username,
 		Email:    user.Email,
 		Password: user.Password,
-		RoleID:   2, // everyone who regis it's supposed to be users
+		Role:   2, // everyone who regis it's supposed to be users
 	}
 }
 
