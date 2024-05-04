@@ -78,6 +78,7 @@ jobs:
           sudo apt update && sudo apt install vlt -y
           export HCP_CLIENT_ID=$HCP_CLIENT_ID
           export HCP_CLIENT_SECRET=$HCP_CLIENT_SECRET
+          vlt config init
           echo "Using Vault Address: $HCP_CLIENT_ID"
           vlt secrets list
 
