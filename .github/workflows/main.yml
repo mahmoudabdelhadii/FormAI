@@ -71,11 +71,19 @@ jobs:
         run: |
           echo "Using Vault Address: ${{ secrets.VAULT_ADDR }}"
           echo "Authenticating with Vault..."
+          sudo apt-get update
+          sudo apt-get install jq
+          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+          sudo apt update && sudo apt install vlt -y
+          export HCP_CLIENT_ID=$HCP_CLIENT_ID
+          export HCP_CLIENT_SECRET=$HCP_CLIENT_SECRET
+          vlt secrets list
           # Use curl or vault CLI to authenticate and retrieve secrets
         env:
           VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
-          ROLE_ID: ${{ secrets.ROLE_ID }}
-          SECRET_ID: ${{ secrets.SECRET_ID }}
+          HCP_CLIENT_ID: ${{ secrets.ROLE_ID }}
+          HCP_CLIENT_SECRET: ${{ secrets.SECRET_ID }}
       - name: Build, Push docker image
         env:
           REGISTRY: "${{ steps.login-ecr.outputs.registry }}"
@@ -85,7 +93,7 @@ jobs:
           REFRESH_SECRET: ${{ secrets.REFRESH_SECRET }}
           SECRET: ${{ secrets.SECRET }}
         run: |-
-          docker-compose build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG --build-arg DATABASE_URL=$DATABASE_URL --build-arg SECRET=$SECRET --build-arg REFRESH_SECRET=$REFRESH_SECRET .
+          docker-compose build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
         working-directory: ./server
       - name: Deploy docker image to EC2
