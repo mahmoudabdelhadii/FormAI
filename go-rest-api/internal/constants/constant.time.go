@@ -3,5 +3,5 @@ package constants
 import "time"
 
 var (
-	GMT7 = time.FixedZone("GMT+7", 7*60*60)
+	GMTM4 = time.FixedZone("GMT-4", -4*60*60)
 )

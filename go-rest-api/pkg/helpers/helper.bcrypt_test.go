@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/snykk/go-rest-boilerplate/pkg/helpers"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/pkg/helpers"
 )
 
 func TestGenerateHash(t *testing.T) {

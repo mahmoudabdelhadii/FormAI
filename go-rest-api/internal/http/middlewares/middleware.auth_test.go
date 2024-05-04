@@ -7,9 +7,9 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/snykk/go-rest-boilerplate/internal/config"
-	"github.com/snykk/go-rest-boilerplate/internal/http/middlewares"
-	"github.com/snykk/go-rest-boilerplate/pkg/jwt"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/config"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/http/middlewares"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/pkg/jwt"
 	"github.com/stretchr/testify/assert"
 )
 

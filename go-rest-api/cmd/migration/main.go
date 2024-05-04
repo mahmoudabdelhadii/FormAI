@@ -4,16 +4,15 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/config"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/constants"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/utils"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/pkg/logger"
 	"github.com/sirupsen/logrus"
-	"github.com/snykk/go-rest-boilerplate/internal/config"
-	"github.com/snykk/go-rest-boilerplate/internal/constants"
-	"github.com/snykk/go-rest-boilerplate/internal/utils"
-	"github.com/snykk/go-rest-boilerplate/pkg/logger"
 )
 
 const (
@@ -73,7 +72,7 @@ func migrate(db *sqlx.DB, action string) (err error) {
 
 	for _, file := range files {
 		logger.Info("Executing migration", logrus.Fields{constants.LoggerCategory: constants.LoggerCategoryMigration, constants.LoggerFile: file})
-		data, err := ioutil.ReadFile(file)
+		data, err := os.ReadFile(file)
 		if err != nil {
 			return errors.New("error when read file")
 		}

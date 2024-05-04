@@ -10,6 +10,11 @@ env:
   PRIVATE_SSH_KEY: ${{ secrets.AWS_SSH_KEY_PRIVATE }}
   PUBLIC_SSH_KEY: ${{ secrets.AWS_SSH_KEY_PUBLIC }}
   AWS_REGION: us-east-1
+  VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+  HCP_CLIENT_SECRET: ${{ secrets.HCP_CLIENT_SECRET }}
+  HCP_CLIENT_ID: ${{ secrets.HCP_CLIENT_ID }}
+
+  
 
 jobs:
   deploy-infra:
@@ -62,13 +67,25 @@ jobs:
       - name: Login to AWS ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
+      - name: Use Vault Secrets
+        run: |
+          echo "Using Vault Address: ${{ secrets.VAULT_ADDR }}"
+          echo "Authenticating with Vault..."
+          # Use curl or vault CLI to authenticate and retrieve secrets
+        env:
+          VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+          ROLE_ID: ${{ secrets.ROLE_ID }}
+          SECRET_ID: ${{ secrets.SECRET_ID }}
       - name: Build, Push docker image
         env:
           REGISTRY: "${{ steps.login-ecr.outputs.registry }}"
           REPOSITORY: formai
           IMAGE_TAG: ${{ github.sha }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          REFRESH_SECRET: ${{ secrets.REFRESH_SECRET }}
+          SECRET: ${{ secrets.SECRET }}
         run: |-
-          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker-compose build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG --build-arg DATABASE_URL=$DATABASE_URL --build-arg SECRET=$SECRET --build-arg REFRESH_SECRET=$REFRESH_SECRET .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
         working-directory: ./server
       - name: Deploy docker image to EC2

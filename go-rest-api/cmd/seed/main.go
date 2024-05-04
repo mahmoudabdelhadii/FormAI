@@ -2,12 +2,12 @@ package main
 
 import (
 	_ "github.com/lib/pq"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/cmd/seed/seeders"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/config"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/constants"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/utils"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/pkg/logger"
 	"github.com/sirupsen/logrus"
-	"github.com/snykk/go-rest-boilerplate/cmd/seed/seeders"
-	"github.com/snykk/go-rest-boilerplate/internal/config"
-	"github.com/snykk/go-rest-boilerplate/internal/constants"
-	"github.com/snykk/go-rest-boilerplate/internal/utils"
-	"github.com/snykk/go-rest-boilerplate/pkg/logger"
 )
 
 func init() {

@@ -11,15 +11,15 @@ import (
 
 	dgriJWT "github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	V1Domains "github.com/snykk/go-rest-boilerplate/internal/business/domains/v1"
-	V1Usecases "github.com/snykk/go-rest-boilerplate/internal/business/usecases/v1"
-	"github.com/snykk/go-rest-boilerplate/internal/config"
-	"github.com/snykk/go-rest-boilerplate/internal/constants"
-	"github.com/snykk/go-rest-boilerplate/internal/http/datatransfers/requests"
-	V1Handlers "github.com/snykk/go-rest-boilerplate/internal/http/handlers/v1"
-	"github.com/snykk/go-rest-boilerplate/internal/mocks"
-	"github.com/snykk/go-rest-boilerplate/pkg/helpers"
-	"github.com/snykk/go-rest-boilerplate/pkg/jwt"
+	V1Domains "github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/business/domains/v1"
+	V1Usecases "github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/business/usecases/v1"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/config"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/constants"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/http/datatransfers/requests"
+	V1Handlers "github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/http/handlers/v1"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/mocks"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/pkg/helpers"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/pkg/jwt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -51,18 +51,18 @@ func setup(t *testing.T) {
 			ID:        "ddfcea5c-d919-4a8f-a631-4ace39337s3a",
 			Username:  "itsmepatrick",
 			Email:     "najibfikri13@gmail.com",
-			RoleID:    1,
+			Role:    1,
 			Password:  "23123sdf!",
-			Active:    true,
+			IsEmailVerified:    true,
 			CreatedAt: time.Now(),
 		},
 		{
 			ID:        "wifff3jd-idhd-0sis-8dua-4fiefie37kfj",
 			Username:  "johny",
 			Email:     "johny123@gmail.com",
-			RoleID:    2,
+			Role:    2,
 			Password:  "23123sdf!",
-			Active:    true,
+			IsEmailVerified:    true,
 			CreatedAt: time.Now(),
 		},
 	}
@@ -72,8 +72,8 @@ func setup(t *testing.T) {
 		Username:  "itsmepatrick",
 		Email:     "najibfikri13@gmail.com",
 		Password:  "23123sdf!",
-		RoleID:    2,
-		Active:    false,
+		Role:    2,
+		IsEmailVerified:    false,
 		CreatedAt: time.Now(),
 	}
 

@@ -4,9 +4,9 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/snykk/go-rest-boilerplate/internal/constants"
-	V1Handler "github.com/snykk/go-rest-boilerplate/internal/http/handlers/v1"
-	"github.com/snykk/go-rest-boilerplate/pkg/jwt"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/constants"
+	V1Handler "github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/http/handlers/v1"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/pkg/jwt"
 )
 
 type AuthMiddleware struct {

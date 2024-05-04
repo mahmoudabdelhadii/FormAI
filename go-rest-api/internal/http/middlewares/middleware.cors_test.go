@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/snykk/go-rest-boilerplate/internal/constants"
-	"github.com/snykk/go-rest-boilerplate/internal/http/middlewares"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/constants"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/http/middlewares"
 	"github.com/stretchr/testify/assert"
 )
 

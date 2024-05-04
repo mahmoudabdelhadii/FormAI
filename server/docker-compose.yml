@@ -7,9 +7,14 @@ services:
       target: production
     ports:
     - 8080:8080
-    env_file:
-    - ./.env
-
+    environment:
+      DATABASE_URL: '${DATABASE_URL}'
+      SECRET: '${SECRET}'
+      REFRESH_SECRET: '${REFRESH_SECRET}'
+      CRYPTO_KEY: '${CRYPTO_KEY}'
+      EMAIL: '${EMAIL}'
+      PASSWORD: '${PASSWORD}'
+      EMAIL_SERVICE: '${EMAIL_SERVICE}'
 
 
         

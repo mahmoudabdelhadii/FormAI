@@ -1,11 +1,11 @@
 package seeders
 
 import (
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/constants"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/datasources/records"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/pkg/helpers"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/pkg/logger"
 	"github.com/sirupsen/logrus"
-	"github.com/snykk/go-rest-boilerplate/internal/constants"
-	"github.com/snykk/go-rest-boilerplate/internal/datasources/records"
-	"github.com/snykk/go-rest-boilerplate/pkg/helpers"
-	"github.com/snykk/go-rest-boilerplate/pkg/logger"
 )
 
 var pass string
@@ -23,15 +23,15 @@ func init() {
 			Username: "patrick star 7",
 			Email:    "patrick@gmail.com",
 			Password: pass,
-			Active:   true,
-			RoleId:   1,
+			IsEmailVerified:   true,
+			Role:   1,
 		},
 		{
 			Username: "john doe",
 			Email:    "johndoe@gmail.com",
 			Password: pass,
-			Active:   false,
-			RoleId:   2,
+			IsEmailVerified:   false,
+			Role:   2,
 		},
 	}
 }

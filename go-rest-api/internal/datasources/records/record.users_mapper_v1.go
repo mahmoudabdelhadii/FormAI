@@ -1,7 +1,7 @@
 package records
 
 import (
-	V1Domains "github.com/snykk/go-rest-boilerplate/internal/business/domains/v1"
+	V1Domains "github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/business/domains/v1"
 )
 
 func (u *Users) ToV1Domain() V1Domains.UserDomain {
@@ -10,10 +10,9 @@ func (u *Users) ToV1Domain() V1Domains.UserDomain {
 		Username:  u.Username,
 		Email:     u.Email,
 		Password:  u.Password,
-		Active:    u.Active,
-		RoleID:    u.RoleId,
+		IsEmailVerified:    u.IsEmailVerified,
+		Role:    u.Role,
 		CreatedAt: u.CreatedAt,
-		UpdatedAt: u.UpdatedAt,
 	}
 }
 
@@ -23,10 +22,10 @@ func FromUsersV1Domain(u *V1Domains.UserDomain) Users {
 		Username:  u.Username,
 		Email:     u.Email,
 		Password:  u.Password,
-		Active:    u.Active,
-		RoleId:    u.RoleID,
+		IsEmailVerified:    u.IsEmailVerified,
+		Role:    u.Role,
 		CreatedAt: u.CreatedAt,
-		UpdatedAt: u.UpdatedAt,
+	
 	}
 }
 

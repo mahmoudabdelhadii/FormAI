@@ -9,7 +9,7 @@ info:
 
   license:
     name: MIT License
-    url: https://github.com/snykk/go-rest-boilerplate/blob/master/LICENSE
+    url: https://github.com/mahmoudabdelhadii/FormAI/go-rest-api/blob/master/LICENSE
 securityDefinitions:
   Bearer:
     type: apiKey

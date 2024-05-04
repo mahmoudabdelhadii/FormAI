@@ -4,9 +4,9 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/snykk/go-rest-boilerplate/internal/config"
-	"github.com/snykk/go-rest-boilerplate/internal/constants"
-	"github.com/snykk/go-rest-boilerplate/internal/datasources/drivers"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/config"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/constants"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/datasources/drivers"
 )
 
 func SetupPostgresConnection() (*sqlx.DB, error) {

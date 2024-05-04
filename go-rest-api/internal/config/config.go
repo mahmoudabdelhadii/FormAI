@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/snykk/go-rest-boilerplate/internal/constants"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/constants"
 	"github.com/spf13/viper"
 )
 

@@ -7,12 +7,12 @@ import (
 	"testing"
 	"time"
 
-	V1Domains "github.com/snykk/go-rest-boilerplate/internal/business/domains/v1"
-	V1Usecases "github.com/snykk/go-rest-boilerplate/internal/business/usecases/v1"
-	"github.com/snykk/go-rest-boilerplate/internal/constants"
-	"github.com/snykk/go-rest-boilerplate/internal/http/datatransfers/requests"
-	"github.com/snykk/go-rest-boilerplate/internal/mocks"
-	"github.com/snykk/go-rest-boilerplate/pkg/helpers"
+	V1Domains "github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/business/domains/v1"
+	V1Usecases "github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/business/usecases/v1"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/constants"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/http/datatransfers/requests"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/mocks"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/pkg/helpers"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -36,18 +36,18 @@ func setup(t *testing.T) {
 			ID:        "ddfcea5c-d919-4a8f-a631-4ace39337s3a",
 			Username:  "itsmepatrick",
 			Email:     "najibfikri13@gmail.com",
-			RoleID:    1,
+			Role:    1,
 			Password:  "11111",
-			Active:    true,
+			IsEmailVerified:    true,
 			CreatedAt: time.Now(),
 		},
 		{
 			ID:        "wifff3jd-idhd-0sis-8dua-4fiefie37kfj",
 			Username:  "johny",
 			Email:     "johny123@gmail.com",
-			RoleID:    2,
+			Role:    2,
 			Password:  "11111",
-			Active:    true,
+			IsEmailVerified:    true,
 			CreatedAt: time.Now(),
 		},
 	}
@@ -57,8 +57,8 @@ func setup(t *testing.T) {
 		Username:  "itsmepatrick",
 		Email:     "najibfikri13@gmail.com",
 		Password:  "11111",
-		RoleID:    2,
-		Active:    false,
+		Role:    2,
+		IsEmailVerified:    false,
 		CreatedAt: time.Now(),
 	}
 }
@@ -80,7 +80,7 @@ func TestStore(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, http.StatusCreated, statusCode)
 		assert.NotEqual(t, "", result.ID)
-		assert.Equal(t, 2, result.RoleID)
+		assert.Equal(t, 2, result.Role)
 		assert.Equal(t, true, helpers.ValidateHash("11111", pass))
 		assert.NotNil(t, result.CreatedAt)
 	})
@@ -103,7 +103,7 @@ func TestLogin(t *testing.T) {
 			Email:    "najibfikri13@gmail.com",
 			Password: "11111",
 		}
-		userDataFromDB.Active = true
+		userDataFromDB.IsEmailVerified = true
 		userDataFromDB.Password, _ = helpers.GenerateHash(userDataFromDB.Password)
 
 		userRepoMock.Mock.On("GetByEmail", mock.Anything, mock.AnythingOfType("*v1.UserDomain")).Return(userDataFromDB, nil).Once()
@@ -114,14 +114,14 @@ func TestLogin(t *testing.T) {
 		assert.NotNil(t, result)
 		assert.Equal(t, http.StatusOK, statusCode)
 		assert.Nil(t, err)
-		assert.Contains(t, result.Token, "ey")
+		assert.Contains(t, result.AccessToken, "ey")
 	})
 	t.Run("Test 2 | Account Not Activated Yet", func(t *testing.T) {
 		req := requests.UserLoginRequest{
 			Email:    "najibfikri13@gmail.com",
 			Password: "11111",
 		}
-		userDataFromDB.Active = false
+		userDataFromDB.IsEmailVerified = false
 		userDataFromDB.Password, _ = helpers.GenerateHash(userDataFromDB.Password)
 
 		userRepoMock.Mock.On("GetByEmail", mock.Anything, mock.AnythingOfType("*v1.UserDomain")).Return(userDataFromDB, nil).Once()
@@ -131,14 +131,14 @@ func TestLogin(t *testing.T) {
 		assert.Equal(t, http.StatusForbidden, statusCode)
 		assert.NotNil(t, err)
 		assert.Equal(t, errors.New("account is not activated"), err)
-		assert.Equal(t, "", result.Token)
+		assert.Equal(t, "", result.AccessToken)
 	})
 	t.Run("Test 3 | Invalid Credential", func(t *testing.T) {
 		req := requests.UserLoginRequest{
 			Email:    "najibfikri13@gmail.com",
 			Password: "111112",
 		}
-		userDataFromDB.Active = true
+		userDataFromDB.IsEmailVerified = true
 		userDataFromDB.Password, _ = helpers.GenerateHash(userDataFromDB.Password)
 
 		userRepoMock.Mock.On("GetByEmail", mock.Anything, mock.AnythingOfType("*v1.UserDomain")).Return(userDataFromDB, nil).Once()
@@ -149,7 +149,7 @@ func TestLogin(t *testing.T) {
 		assert.NotNil(t, err)
 		assert.Equal(t, http.StatusUnauthorized, statusCode)
 		assert.Equal(t, errors.New("invalid email or password"), err)
-		assert.Equal(t, "", result.Token)
+		assert.Equal(t, "", result.AccessToken)
 	})
 }
 

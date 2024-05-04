@@ -11,16 +11,16 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/config"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/constants"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/datasources/caches"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/http/middlewares"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/http/routes"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/utils"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/pkg/jwt"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/pkg/logger"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/pkg/mailer"
 	"github.com/sirupsen/logrus"
-	"github.com/snykk/go-rest-boilerplate/internal/config"
-	"github.com/snykk/go-rest-boilerplate/internal/constants"
-	"github.com/snykk/go-rest-boilerplate/internal/datasources/caches"
-	"github.com/snykk/go-rest-boilerplate/internal/http/middlewares"
-	"github.com/snykk/go-rest-boilerplate/internal/http/routes"
-	"github.com/snykk/go-rest-boilerplate/internal/utils"
-	"github.com/snykk/go-rest-boilerplate/pkg/jwt"
-	"github.com/snykk/go-rest-boilerplate/pkg/logger"
-	"github.com/snykk/go-rest-boilerplate/pkg/mailer"
 )
 
 type App struct {

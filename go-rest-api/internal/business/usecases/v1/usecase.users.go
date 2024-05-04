@@ -7,11 +7,11 @@ import (
 	"net/http"
 	"time"
 
-	V1Domains "github.com/snykk/go-rest-boilerplate/internal/business/domains/v1"
-	"github.com/snykk/go-rest-boilerplate/internal/constants"
-	"github.com/snykk/go-rest-boilerplate/pkg/helpers"
-	"github.com/snykk/go-rest-boilerplate/pkg/jwt"
-	"github.com/snykk/go-rest-boilerplate/pkg/mailer"
+	V1Domains "github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/business/domains/v1"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/constants"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/pkg/helpers"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/pkg/jwt"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/pkg/mailer"
 )
 
 type userUsecase struct {
@@ -34,8 +34,8 @@ func (userUC *userUsecase) Store(ctx context.Context, inDom *V1Domains.UserDomai
 		return V1Domains.UserDomain{}, http.StatusInternalServerError, err
 	}
 
-	inDom.CreatedAt = time.Now().In(constants.GMT7)
-	fmt.Println(time.Now().In(constants.GMT7))
+	inDom.CreatedAt = time.Now().In(constants.GMTM4)
+	fmt.Println(time.Now().In(constants.GMTM4))
 	err = userUC.repo.Store(ctx, inDom)
 	if err != nil {
 		return V1Domains.UserDomain{}, http.StatusInternalServerError, err
@@ -55,7 +55,7 @@ func (userUC *userUsecase) Login(ctx context.Context, inDom *V1Domains.UserDomai
 		return V1Domains.UserDomain{}, http.StatusUnauthorized, errors.New("invalid email or password") // for security purpose better use generic error message
 	}
 
-	if !userDomain.Active {
+	if !userDomain.IsEmailVerified {
 		return V1Domains.UserDomain{}, http.StatusForbidden, errors.New("account is not activated")
 	}
 
@@ -63,10 +63,10 @@ func (userUC *userUsecase) Login(ctx context.Context, inDom *V1Domains.UserDomai
 		return V1Domains.UserDomain{}, http.StatusUnauthorized, errors.New("invalid email or password")
 	}
 
-	if userDomain.RoleID == constants.AdminID {
-		userDomain.Token, err = userUC.jwtService.GenerateToken(userDomain.ID, true, userDomain.Email, userDomain.Password)
+	if userDomain.Role == constants.AdminID {
+		userDomain.AccessToken, err = userUC.jwtService.GenerateToken(userDomain.User, true, userDomain.Email, userDomain.Password)
 	} else {
-		userDomain.Token, err = userUC.jwtService.GenerateToken(userDomain.ID, false, userDomain.Email, userDomain.Password)
+		userDomain.AccessToken, err = userUC.jwtService.GenerateToken(userDomain.User, false, userDomain.Email, userDomain.Password)
 	}
 
 	if err != nil {
@@ -82,7 +82,7 @@ func (userUC *userUsecase) SendOTP(ctx context.Context, email string) (otpCode s
 		return "", http.StatusNotFound, errors.New("email not found")
 	}
 
-	if domain.Active {
+	if domain.IsEmailVerified {
 		return "", http.StatusBadRequest, errors.New("account already activated")
 	}
 
@@ -104,7 +104,7 @@ func (userUC *userUsecase) VerifOTP(ctx context.Context, email string, userOTP s
 		return http.StatusNotFound, errors.New("email not found")
 	}
 
-	if domain.Active {
+	if domain.IsEmailVerified {
 		return http.StatusBadRequest, errors.New("account already activated")
 	}
 
@@ -121,7 +121,7 @@ func (userUC *userUsecase) ActivateUser(ctx context.Context, email string) (stat
 		return http.StatusNotFound, errors.New("email not found")
 	}
 
-	if err = userUC.repo.ChangeActiveUser(ctx, &V1Domains.UserDomain{ID: user.ID, Active: true}); err != nil {
+	if err = userUC.repo.ChangeActiveUser(ctx, &V1Domains.UserDomain{ID: user.ID, IsEmailVerified: true}); err != nil {
 		return http.StatusInternalServerError, err
 	}
 
@@ -130,6 +130,15 @@ func (userUC *userUsecase) ActivateUser(ctx context.Context, email string) (stat
 
 func (uc *userUsecase) GetByEmail(ctx context.Context, email string) (outDom V1Domains.UserDomain, statusCode int, err error) {
 	user, err := uc.repo.GetByEmail(ctx, &V1Domains.UserDomain{Email: email})
+	if err != nil {
+		return V1Domains.UserDomain{}, http.StatusNotFound, errors.New("email not found")
+	}
+
+	return user, http.StatusOK, nil
+}
+
+func (uc *userUsecase) GetByUsername(ctx context.Context, username string) (outDom V1Domains.UserDomain, statusCode int, err error) {
+	user, err := uc.repo.GetByUsername(ctx, &V1Domains.UserDomain{Username: username})
 	if err != nil {
 		return V1Domains.UserDomain{}, http.StatusNotFound, errors.New("email not found")
 	}

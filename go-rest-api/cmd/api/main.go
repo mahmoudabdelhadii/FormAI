@@ -3,11 +3,11 @@ package main
 import (
 	"runtime"
 
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/cmd/api/server"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/config"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/internal/constants"
+	"github.com/mahmoudabdelhadii/FormAI/go-rest-api/pkg/logger"
 	"github.com/sirupsen/logrus"
-	"github.com/snykk/go-rest-boilerplate/cmd/api/server"
-	"github.com/snykk/go-rest-boilerplate/internal/config"
-	"github.com/snykk/go-rest-boilerplate/internal/constants"
-	"github.com/snykk/go-rest-boilerplate/pkg/logger"
 )
 
 func init() {
