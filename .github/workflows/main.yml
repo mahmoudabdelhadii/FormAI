@@ -93,7 +93,7 @@ jobs:
           REFRESH_SECRET: ${{ secrets.REFRESH_SECRET }}
           SECRET: ${{ secrets.SECRET }}
         run: |-
-          docker-compose build --build-arg DATABASE_URL=$DATABASE_URL --build-arg SECRET=$SECRET --build-arg REFRESH_SECRET=$REFRESH_SECRET --t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker build --build-arg DATABASE_URL=$DATABASE_URL --build-arg SECRET=$SECRET --build-arg REFRESH_SECRET=$REFRESH_SECRET --t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
         working-directory: ./server
       - name: Deploy docker image to EC2
