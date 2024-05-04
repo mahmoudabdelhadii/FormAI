@@ -12,4 +12,4 @@ else
 fi
 
 echo "INFO: Starting the application..."
-NODE_ENV=production PORT=8080 node dist/index.js
+NODE_ENV=production NODE_PORT=8080 node dist/index.js
