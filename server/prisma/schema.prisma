@@ -1,33 +1,35 @@
 generator client {
   provider        = "prisma-client-js"
-  output          = "../src/generated/client"
-  previewFeatures = ["postgresqlExtensions", "views", "relationJoins"]
-  binaryTargets   = ["native", "linux-musl-openssl-3.0.x"]
+  previewFeatures = ["relationJoins"]
+  output   = "../src/generated/client"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
-  provider   = "postgresql"
-  url        = env("DATABASE_URL")
-  extensions = [uuid_ossp(map: "uuid-ossp", schema: "public")]
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Admin {
-  id       Int     @id @default(autoincrement())
-  username String? @db.VarChar
-  password String? @db.VarChar
+  id         Int          @id @default(autoincrement())
+  username   String?      @unique @db.VarChar
+  password   String?      @db.VarChar
+  AdminToken AdminToken?
 }
 
 model AdminToken {
   id          Int     @id @default(autoincrement())
-  user        String  @db.VarChar
+  user        String  @db.VarChar @unique
   accessToken String? @db.VarChar
+  Admin       Admin?  @relation(fields: [user], references: [username])
 }
 
 model BannedUsers {
-  id        Int    @id @default(autoincrement())
+  id        Int        @id @default(autoincrement())
   community Int
-  user      String @db.VarChar
+  user      String     @db.VarChar
   reasonId  Int?
+  Community Community? @relation(fields: [community], onDelete: NoAction, onUpdate: NoAction, references: [id])
 }
 
 model Comment {
@@ -35,32 +37,25 @@ model Comment {
   body String? @db.VarChar
   user String  @db.VarChar
   post Int
+  Post Post?   @relation(fields: [post], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model Community {
-  id            Int             @id @default(autoincrement())
-  name          String?         @db.VarChar
-  description   String?         @db.VarChar
-  CommunityUser CommunityUser[]
+  id               Int                @id @default(autoincrement())
+  name             String?            @db.VarChar
+  description      String?            @db.VarChar
+  CommunityUser    CommunityUser[]
+  CommunityRequest CommunityRequest[]
+  BannedUsers      BannedUsers[]
 }
 
 model CommunityRequest {
-  id          Int       @id @default(autoincrement())
-  user        String?   @db.VarChar
+  id          Int        @id @default(autoincrement())
+  user        String?    @db.VarChar
   community   Int?
-  requestedAt DateTime? @default(now()) @db.Timestamp(6)
-  message     String?   @db.VarChar
-}
-
-model CommunityUser {
-  id         Int       @id @default(autoincrement())
-  community  Int
-  user       String    @db.VarChar
-  role       Int
-  verifiedAt DateTime? @default(now()) @db.Timestamp(6)
-  Community  Community @relation(fields: [community], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  UserRoles  UserRoles @relation(fields: [role], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  User       User      @relation(fields: [user], references: [username], onDelete: NoAction, onUpdate: NoAction)
+  requestedAt DateTime?  @default(now()) @db.Timestamp(6)
+  message     String?    @db.VarChar
+  Community   Community? @relation(fields: [community], onDelete: NoAction, onUpdate: NoAction, references: [id])
 }
 
 model Context {
@@ -75,48 +70,11 @@ model Context {
   isTrusted  Boolean?
 }
 
-model Email {
-  id               Int       @id @default(autoincrement())
-  email            String?   @db.VarChar
-  verificationCode String?   @db.VarChar
-  messageId        String?   @db.VarChar
-  for              Int?
-  createdAt        DateTime? @default(now()) @db.Timestamp(6)
-  EmailFor         EmailFor? @relation(fields: [for], references: [id], onDelete: NoAction, onUpdate: NoAction)
-}
-
-model EmailFor {
-  id    Int     @id
-  for   String? @db.VarChar
-  Email Email[]
-}
-
-model Leaderboard {
-  id        Int @id @default(autoincrement())
-  community Int
-}
-
-model LeaderboardSubmission {
-  id         Int       @id @default(autoincrement())
-  user       String?   @db.VarChar
-  community  Int?
-  entryUrl   String?   @db.VarChar
-  verifiedBy Int?
-  weight     String?   @db.VarChar
-  type       Int?
-  verifiedAt DateTime? @default(now()) @db.Timestamp(6)
-  rank       Int?
-}
-
-model LeaderboardSubmissionType {
-  id   Int     @id
-  type String? @db.VarChar
-}
-
 model Like {
   id   Int    @id @default(autoincrement())
   user String @db.VarChar
   post Int
+  Post Post?  @relation(fields: [post], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model Log {
@@ -127,43 +85,31 @@ model Log {
   type      Int?
   level     Int?
   timestamp DateTime? @default(now()) @db.Timestamp(6)
-}
-
-model LogLevel {
-  id    Int     @id
-  level String? @db.VarChar
-}
-
-model LogType {
-  id   Int     @id
-  type String? @db.VarChar
+  LogLevel  LogLevel? @relation(fields: [level], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  LogType   LogType?  @relation(fields: [type], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model PendingPost {
-  id                Int                @id @default(autoincrement())
-  Content           String?            @db.VarChar
-  fileUrl           String             @db.VarChar
+  id                Int                 @id @default(autoincrement())
+  Content           String?             @db.VarChar
+  fileUrl           String              @db.VarChar
   community         Int
-  user              String             @db.VarChar
-  caption           String?            @db.VarChar
+  user              String              @db.VarChar
+  caption           String?             @db.VarChar
   status            Int?
-  confirmationToken String?            @db.VarChar
-  PendingPostStatus PendingPostStatus? @relation(fields: [status], references: [id], onDelete: NoAction, onUpdate: NoAction)
-}
-
-model PendingPostStatus {
-  id          Int           @id
-  status      String?       @db.VarChar
-  PendingPost PendingPost[]
+  confirmationToken String?             @db.VarChar
+  PendingPostStatus PendingPostStatus[]
 }
 
 model Post {
-  id        Int     @id @default(autoincrement())
-  Content   String? @db.VarChar
-  fileUrl   String  @db.VarChar
+  id        Int       @id @default(autoincrement())
+  Content   String?   @db.VarChar
+  fileUrl   String    @db.VarChar
   community Int
-  user      String  @db.VarChar
-  caption   String? @db.VarChar
+  user      String    @db.VarChar
+  caption   String?   @db.VarChar
+  Comment   Comment[]
+  Like      Like[]
 }
 
 model Preferences {
@@ -187,6 +133,102 @@ model Report {
   reportDate   DateTime? @default(now()) @db.Timestamp(6)
 }
 
+model Token {
+  id           Int       @id @default(autoincrement())
+  user         String    @db.VarChar
+  refreshToken String?   @db.VarChar
+  accessToken  String?   @db.VarChar
+  createdAt    DateTime? @default(now()) @db.Timestamp(6)
+  User         User?     @relation(fields: [user], references: [username])
+}
+
+model User {
+  id              Int             @default(autoincrement())
+  username        String          @id @db.VarChar
+  firstName       String          @db.VarChar
+  lastName        String          @db.VarChar
+  email           String          @db.VarChar
+  password        String          @db.VarChar
+  avatarUrl       String?         @db.VarChar
+  bio             String?         @db.VarChar
+  createdAt       DateTime?       @default(now()) @db.Timestamp(6)
+  isEmailVerified Boolean?        @default(false)
+  height          Float?
+  weight          Float?
+  age             Int?
+  CommunityUser   CommunityUser[]
+  Token           Token[]
+  
+}
+
+model UserRoles {
+  id   Int     @id
+  role String? @unique @db.VarChar
+  CommunityUser CommunityUser[]
+}
+
+model Email {
+  id               Int       @id @default(autoincrement())
+  email            String?   @db.VarChar
+  verificationCode String?   @db.VarChar
+  messageId        String?   @db.VarChar
+  for              Int?
+  createdAt        DateTime? @default(now()) @db.Timestamp(6)
+  EmailFor         EmailFor? @relation(fields: [for], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model EmailFor {
+  id    Int     @id
+  for   String? @db.VarChar
+  Email Email[]
+}
+
+model Leaderboard {
+  id                    Int                     @id @default(autoincrement())
+  community             Int
+  LeaderboardSubmission LeaderboardSubmission[]
+}
+
+model LeaderboardSubmission {
+  id                        Int                         @id @default(autoincrement())
+  user                      String?                     @db.VarChar
+  community                 Int?
+  entryUrl                  String?                     @db.VarChar
+  verifiedBy                Int?
+  weight                    String?                     @db.VarChar
+  type                      Int?
+  verifiedAt                DateTime?                   @default(now()) @db.Timestamp(6)
+  rank                      Int?
+  LeaderboardSubmissionType LeaderboardSubmissionType[]
+  Leaderboard               Leaderboard?                @relation(fields: [leaderboardId], references: [id])
+  leaderboardId             Int?
+}
+
+model LeaderboardSubmissionType {
+  id                      Int                    @id
+  type                    String?                @db.VarChar
+  LeaderboardSubmission   LeaderboardSubmission? @relation(fields: [leaderboardSubmissionId], references: [id])
+  leaderboardSubmissionId Int?
+}
+
+model PendingPostStatus {
+  id          Int           @id
+  status      String?       @db.VarChar
+  PendingPost PendingPost[]
+}
+
+model LogLevel {
+  id    Int     @id
+  level String? @db.VarChar
+  Log   Log[]
+}
+
+model LogType {
+  id   Int     @id
+  type String? @db.VarChar
+  Log  Log[]
+}
+
 model SuspiciousLogin {
   id                 Int      @id @default(autoincrement())
   user               String?  @db.VarChar
@@ -201,90 +243,13 @@ model SuspiciousLogin {
   isBlocked          Boolean?
 }
 
-model Token {
-  id           Int       @id @default(autoincrement())
-  user         String    @db.VarChar
-  refreshToken String?   @db.VarChar
-  accessToken  String?   @db.VarChar
-  createdAt    DateTime? @default(now()) @db.Timestamp(6)
-}
-
-model User {
-  username        String          @id @db.VarChar
-  email           String          @db.VarChar
-  password        String          @db.VarChar
-  createdAt       DateTime?       @default(now()) @db.Timestamp(6)
-  isEmailVerified Boolean?        @default(false)
-  id              String?         @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  CommunityUser   CommunityUser[]
-}
-
-model UserRoles {
-  id            Int             @id
-  role          String?         @db.VarChar
-  CommunityUser CommunityUser[]
-}
-
-model UserPersonalInfo {
-  id        String  @id(map: "UserId_pkey") @db.Uuid
-  firstName String  @db.VarChar
-  lastName  String  @db.VarChar
-  avatarUrl String? @db.VarChar
-  bio       String? @db.VarChar
-  height    Float?
-  weight    Float?
-  age       Int?
-}
-
-/// The underlying view does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-view view_leaderboard {
-  id         Int    @unique
-  community  Int?
-  user       String? @db.VarChar
-  entryUrl   String? @db.VarChar
-  rank       Int?
-  type       String? @db.VarChar
-  verifiedBy Int?
-  weight     String? @db.VarChar
-}
-
-/// The underlying view does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-view view_community {
-  community_id   Int?
-  community_user String?   @db.VarChar
-  role_id        Int?
-  role           String?   @db.VarChar
-  verifiedAt     DateTime? @db.Timestamp(6)
-  id             BigInt @unique
-}
-
-/// The underlying view does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-view view_user {
-  id           String  @unique @db.Uuid
-  firstName    String? @db.VarChar
-  lastName     String? @db.VarChar
-  avatarUrl    String? @db.VarChar
-  bio          String? @db.VarChar
-  height       Float?
-  weight       Float?
-  age          Int?
-  username     String? @db.VarChar
-  email        String? @db.VarChar
-  password     String? @db.VarChar
-  communityId  Int?
-  role         String? @db.VarChar
-  refreshToken String? @db.VarChar
-  accessToken  String? @db.VarChar
-}
-
-/// The underlying view does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-view view_post {
-  post_id       Int     @unique
-  user          String? @db.VarChar
-  Post_caption  String? @db.VarChar
-  media_url     String? @db.VarChar
-  community     Int?
-  like_count    BigInt?
-  comment_count BigInt?
-  id            BigInt?
+model CommunityUser {
+  id         Int       @id @default(autoincrement())
+  community  Int
+  user       String    @db.VarChar
+  role       Int
+  verifiedAt DateTime? @default(now()) @db.Timestamp(6)
+  Community  Community @relation(fields: [community], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  UserRoles  UserRoles @relation(fields: [role], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  User       User      @relation(fields: [user], references: [username], onDelete: NoAction, onUpdate: NoAction)
 }
