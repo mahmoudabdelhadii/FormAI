@@ -16,6 +16,3 @@ services:
       PASSWORD: '${PASSWORD}'
       EMAIL_SERVICE: '${EMAIL_SERVICE}'
 
-
-        
-
