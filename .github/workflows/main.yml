@@ -78,9 +78,6 @@ jobs:
           sudo apt update && sudo apt install vlt -y
           export HCP_CLIENT_ID=$HCP_CLIENT_ID
           export HCP_CLIENT_SECRET=$HCP_CLIENT_SECRET
-          vlt config init
-          echo "Using Vault Address: $HCP_CLIENT_ID"
-          vlt secrets list
 
           # Use curl or vault CLI to authenticate and retrieve secrets
         env:
@@ -96,7 +93,7 @@ jobs:
           REFRESH_SECRET: ${{ secrets.REFRESH_SECRET }}
           SECRET: ${{ secrets.SECRET }}
         run: |-
-          docker-compose build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker-compose build --build-arg DATABASE_URL=$DATABASE_URL --build-arg SECRET=$SECRET --build-arg REFRESH_SECRET=$REFRESH_SECRET --t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
         working-directory: ./server
       - name: Deploy docker image to EC2
