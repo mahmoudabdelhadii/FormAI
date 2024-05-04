@@ -17,6 +17,9 @@ ENV SECRET=${SECRET}
 ARG CRYPTO_KEY=none
 ENV CRYPTO_KEY=${CRYPTO_KEY}
 
+ARG NODE_PORT=8080
+ENV NODE_PORT=${NODE_PORT}
+
 # Copy package.json and package-lock.json (or npm-shrinkwrap.json)
 COPY package*.json ./
 
