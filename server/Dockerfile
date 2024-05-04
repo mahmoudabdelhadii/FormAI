@@ -45,6 +45,10 @@ FROM node:21-alpine as production
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 
+ARG DATABASE_URL
+ARG REFRESH_SECRET
+ARG SECRET
+ARG CRYPTO_KEY
 # Repeat the process of setting environment variables
 ENV DATABASE_URL=${DATABASE_URL}
 ENV REFRESH_SECRET=${REFRESH_SECRET}
