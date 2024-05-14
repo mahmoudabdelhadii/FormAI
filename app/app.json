@@ -1,26 +1,25 @@
 {
   "expo": {
-    "name": "FormAI-Frontend",
-    "slug": "FormAI-Frontend",
+    "name": "Forma",
+    "slug": "Forma",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./src/assets/logo.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#048998"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.Forma"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./src/assets/logo.png",
+        "backgroundColor": "#048998"
       }
     },
     "web": {
