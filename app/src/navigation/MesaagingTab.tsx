@@ -1,8 +1,8 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import MessagingScreen from "./MessagingScreen";
-import ChatScreen from "./ChatScreen"; // This would be your detailed chat screen
+import MessagingScreen from "../Screens/MessagingScreen";
+import ChatScreen from "../Screens/ChatScreen"; // This would be your detailed chat screen
 
 const Stack = createStackNavigator();
 

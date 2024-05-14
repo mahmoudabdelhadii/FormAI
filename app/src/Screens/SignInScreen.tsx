@@ -1,106 +1,53 @@
-import React from "react";
-import { View, TextInput, Button, StyleSheet, Text } from "react-native";
+import React, { useState } from "react";
+import { View, TextInput, Button, Text } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
-
 import { setLoading } from "../state-managment/reducers/loadingReducer";
-import { setUser } from "../state-managment/reducers/userReducer";
+import { styled } from "nativewind";
 
-const SignInScreen = () => {
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
+const StyledView = styled(View);
+const StyledText = styled(Text);
+const StyledTextInput = styled(TextInput);
+const StyledButton = styled(Button);
+
+const SignInScreen: React.FC = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const dispatch = useDispatch();
   const navigation = useNavigation();
 
   const handleSignIn = () => {
-    // Dispatch setLoading action with true to show the loading screen
     dispatch(setLoading(true));
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.container1}>
-        <Text style={styles.SignInLabel}>SignIn</Text>
-      </View>
-
-      <View style={{ width: "100%" }}>
-        <TextInput
-          style={styles.input}
+    <StyledView className="flex-1 justify-center items-center px-10 bg-white">
+      <StyledView className="w-full justify-center items-center self-center mb-20 mt-10">
+        <StyledText className="text-5xl text-[#224957]">SignIn</StyledText>
+      </StyledView>
+      <StyledView className="w-full">
+        <StyledTextInput
+          className="w-full border border-gray-300 px-4 py-3 mb-4 rounded-lg bg-[#224957] text-lg text-white"
           placeholder="Email"
-          placeholderTextColor={"#ffffff"}
+          placeholderTextColor="#ffffff"
           value={email}
           onChangeText={setEmail}
         />
-        <TextInput
-          style={styles.input}
+        <StyledTextInput
+          className="w-full border border-gray-300 px-4 py-3 mb-4 rounded-lg bg-[#224957] text-lg text-white"
           placeholder="Password"
-          placeholderTextColor={"#ffffff"}
+          placeholderTextColor="#ffffff"
           secureTextEntry
           value={password}
           onChangeText={setPassword}
         />
-      </View>
-
-      <View style={styles.container2}>
-        <Button title="SignIn" onPress={handleSignIn} />
-      </View>
-    </View>
+      </StyledView>
+      <StyledView className="w-full justify-center items-center mt-6">
+        <StyledButton title="SignIn" onPress={handleSignIn} />
+      </StyledView>
+    </StyledView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: "10%",
-    backgroundColor: "#ffffff",
-  },
-  container1: {
-    width: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-    alignSelf: "center",
-    paddingBottom: "20%",
-    bottom: "10%",
-  },
-  container2: {
-    width: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-    top: "6%",
-  },
-  SignInLabel: {
-    fontSize: 50,
-    color: "#224957",
-  },
-  input: {
-    width: "100%",
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 4,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginBottom: 16,
-    backgroundColor: "#224957",
-    fontSize: 18,
-
-    color: "#ffffff",
-  },
-  forgotPassword: {
-    marginTop: 16,
-    color: "#555",
-    textDecorationLine: "underline",
-  },
-  Button: {
-    width: "100%",
-    height: 48,
-    borderRadius: 8,
-    backgroundColor: "#007AFF",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
 
 export default SignInScreen;

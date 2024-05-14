@@ -1,11 +1,16 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import Home from "./src/navigation/navigation";
 import { Provider } from "react-redux";
 import store from "./src/state-managment/store";
 import { useState } from "react";
 import { useFonts, Inter_900Black } from "@expo-google-fonts/inter";
 import AppInitialization from "./src/components/AppInitilization";
+import { styled } from "nativewind";
+
+const StyledView = styled(View);
+const StyledText = styled(Text);
+
 export default function App() {
   const [isAppInit, setIsAppInit] = useState<boolean>(false);
 
@@ -15,16 +20,15 @@ export default function App() {
 
   if (!fontsLoaded) {
     return (
-      <View style={styles.container}>
-        <Text>Loading Fonts...</Text>
-      </View>
+      <StyledView className="flex-1 bg-white justify-center items-center">
+        <StyledText>Loading Fonts...</StyledText>
+      </StyledView>
     );
   }
 
   return (
     <Provider store={store}>
       <StatusBar style="auto" />
-
       {isAppInit ? (
         <Home />
       ) : (
@@ -35,13 +39,3 @@ export default function App() {
     </Provider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-    fontFamily: "Inter_900Black",
-  },
-});

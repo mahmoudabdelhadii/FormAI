@@ -10,6 +10,13 @@ import {
 import { useNavigation, useIsFocused } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/FontAwesome6";
 import * as IconFontAwesome from "react-native-vector-icons/FontAwesome";
+import { styled } from "nativewind";
+
+const StyledView = styled(View);
+const StyledTouchableOpacity = styled(TouchableOpacity);
+const StyledText = styled(Text);
+const StyledAnimatedView = styled(Animated.View);
+
 type TransformStyle = {
   transform: (
     | { translateX: Animated.AnimatedInterpolation<number> }
@@ -106,37 +113,35 @@ const CustomAddButton = ({ color = "#048998", size = 150, onPress }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <StyledView className="justify-center items-center absolute bottom-6 self-center z-11">
       {isActive && (
         <TouchableWithoutFeedback onPress={handleOverlayPress}>
-          <View style={styles.overlay} />
+          <StyledView className="absolute top-0 left-0 right-0 bottom-0 z-10 bg-transparent" />
         </TouchableWithoutFeedback>
       )}
-      <TouchableOpacity onPress={handlePress}>
-        <Animated.View
-          style={[
-            styles.buttonContainer,
-            {
-              backgroundColor: color,
-              width: size,
-              height: size,
-              borderRadius: size / 2,
-            },
-          ]}
+      <StyledTouchableOpacity onPress={handlePress}>
+        <StyledAnimatedView
+          className="justify-center items-center"
+          style={{
+            backgroundColor: color,
+            width: size,
+            height: size,
+            borderRadius: size / 2,
+          }}
         >
           {isActive ? (
             <IconFontAwesome.default name="close" size={30} color="white" />
           ) : (
             <Icon name="dumbbell" size={30} color="white" />
           )}
-        </Animated.View>
-      </TouchableOpacity>
+        </StyledAnimatedView>
+      </StyledTouchableOpacity>
       {isActive &&
         ["left", "right", "top"].map((direction, index) => (
-          <Animated.View
+          <StyledAnimatedView
             key={index}
+            className="absolute w-17.5 h-17.5 rounded-full bg-[#048998] z-20"
             style={[
-              styles.extraButton,
               {
                 transform: [
                   ...directionalTransform(direction as any).transform,
@@ -147,45 +152,8 @@ const CustomAddButton = ({ color = "#048998", size = 150, onPress }) => {
             ]}
           />
         ))}
-    </View>
+    </StyledView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    justifyContent: "center",
-    alignItems: "center",
-
-    position: "absolute",
-    bottom: 25,
-    alignSelf: "center",
-    zIndex: 11,
-  },
-  buttonContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "white",
-  },
-  extraButton: {
-    position: "absolute",
-    width: 70,
-    height: 70,
-    borderRadius: 50,
-    backgroundColor: "#048998",
-    opacity: 0,
-    zIndex: 20,
-  },
-  overlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 10,
-    backgroundColor: "transparent", // Change to a visible color to see the overlay area
-  },
-});
 
 export default CustomAddButton;

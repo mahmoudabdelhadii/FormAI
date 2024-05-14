@@ -1,23 +1,22 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text } from "react-native";
+import { styled } from "nativewind";
 
-const SearchResultItem = ({ item }) => {
+interface SearchResultItemProps {
+  item: {
+    name: string;
+  };
+}
+
+const StyledView = styled(View);
+const StyledText = styled(Text);
+
+const SearchResultItem: React.FC<SearchResultItemProps> = ({ item }) => {
   return (
-    <View style={styles.itemContainer}>
-      <Text style={styles.itemText}>{item.name}</Text>
-    </View>
+    <StyledView className="p-2.5 border-b border-gray-300">
+      <StyledText className="text-lg">{item.name}</StyledText>
+    </StyledView>
   );
 };
-
-const styles = StyleSheet.create({
-  itemContainer: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-  },
-  itemText: {
-    fontSize: 18,
-  },
-});
 
 export default SearchResultItem;

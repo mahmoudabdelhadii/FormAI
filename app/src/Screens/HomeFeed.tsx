@@ -15,9 +15,11 @@ import {
   FlatListProps,
 } from "react-native";
 import SocialPost from "../components/SocialPost";
+import { styled } from "nativewind";
 interface ScrollToTopContextType {
   scrollToTop: () => void;
 }
+const StyledSafeAreaView = styled(SafeAreaView);
 const ScrollToTopContext = createContext({ scrollToTop: () => {} });
 
 export function useScrollToTop() {
@@ -76,7 +78,7 @@ const HomeFeed = () => {
 
   const value = { scrollToTop };
   return (
-    <SafeAreaView style={styles.container}>
+    <StyledSafeAreaView className="flex-1 bg-white">
       <FlatList
         ref={flatListRef} // Attach the ref
         data={data}
@@ -90,15 +92,8 @@ const HomeFeed = () => {
         onEndReachedThreshold={0.5} // Trigger the call earlier
         showsVerticalScrollIndicator={false}
       />
-    </SafeAreaView>
+    </StyledSafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "white",
-  },
-});
 
 export default HomeFeed;

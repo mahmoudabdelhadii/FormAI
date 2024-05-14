@@ -1,12 +1,16 @@
 import React from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
-
+import { styled } from "nativewind";
 interface MessageItemProps {
   name: string;
   photoUrl: string;
   lastMessage: string;
   onPress: () => void;
 }
+const StyledTouchableOpacity = styled(TouchableOpacity);
+const StyledView = styled(View);
+const StyledText = styled(Text);
+const StyledImage = styled(Image);
 
 const MessageItem: React.FC<MessageItemProps> = ({
   name,
@@ -15,40 +19,20 @@ const MessageItem: React.FC<MessageItemProps> = ({
   onPress,
 }) => {
   return (
-    <TouchableOpacity onPress={onPress} style={styles.container}>
-      <Image source={{ uri: photoUrl }} style={styles.photo} />
-      <View style={styles.textContainer}>
-        <Text style={styles.name}>{name}</Text>
-        <Text style={styles.lastMessage}>{lastMessage}</Text>
-      </View>
-    </TouchableOpacity>
+    <StyledTouchableOpacity
+      onPress={onPress}
+      className="flex-row p-2.5 border-b border-gray-300"
+    >
+      <StyledImage
+        source={{ uri: photoUrl }}
+        className="w-12.5 h-12.5 rounded-full"
+      />
+      <StyledView className="ml-2.5 justify-center">
+        <StyledText className="text-lg font-bold">{name}</StyledText>
+        <StyledText className="text-sm text-gray-600">{lastMessage}</StyledText>
+      </StyledView>
+    </StyledTouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-  },
-  photo: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-  },
-  textContainer: {
-    marginLeft: 10,
-    justifyContent: "center",
-  },
-  name: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  lastMessage: {
-    fontSize: 14,
-    color: "#555",
-  },
-});
 
 export default MessageItem;

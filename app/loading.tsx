@@ -1,35 +1,24 @@
 import React from "react";
-import { View, StyleSheet, Image, Text } from "react-native";
+import { View, Image } from "react-native";
+import { styled } from "nativewind";
 
-const Loading_Screen = () => {
+const StyledView = styled(View);
+const StyledImage = styled(Image);
+
+const LoadingScreen: React.FC = () => {
   return (
-    <View style={styles.container}>
-      <Image
-        style={styles.image}
+    <StyledView className="flex-1 flex-col justify-around items-center bg-[#048998]">
+      <StyledImage
+        className="w-9/10 h-2/5"
         resizeMode="contain"
         source={require("./src/assets/flexingLogo.png")}
       />
-      <Image source={require("./src/assets/logo.gif")} style={styles.image} />
-    </View>
+      <StyledImage
+        className="w-9/10 h-2/5"
+        source={require("./src/assets/logo.gif")}
+      />
+    </StyledView>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: "column",
-    justifyContent: "space-around",
-    alignItems: "center",
-    backgroundColor: "#048998",
-  },
-  container1: {
-    width: "100%",
-    paddingTop: "5%",
-    paddingHorizontal: "10%",
-  },
-  image: {
-    width: "90%",
-    height: "40%",
-  },
-});
-export default Loading_Screen;
+export default LoadingScreen;

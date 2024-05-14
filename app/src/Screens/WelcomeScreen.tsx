@@ -1,8 +1,8 @@
 import React from "react";
 import { View, StyleSheet, Image, Text, Button } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import PrimaryButton from "../components/PrimaryButton";
-import SecondaryButton from "../components/SecondaryButton";
+import CustomButton from "../components/CustomButton";
+
 import SignInScreen from "./SignInScreen";
 import SignUpScreen from "./signUpScreen";
 
@@ -13,15 +13,17 @@ const WelcomeScreen = () => {
     <View style={styles.container}>
       <View style={{ width: "100%" }}>
         <View style={styles.container1}>
-          <SecondaryButton
+          <CustomButton
             onPress={() => navigation.navigate("SignInScreen")}
-            title={"Login"}
+            text="Login"
+            variant="primary"
           />
         </View>
         <View style={styles.container1}>
-          <SecondaryButton
+          <CustomButton
             onPress={() => navigation.navigate("SignUpScreen")}
-            title={"signUp"}
+            text="signUp"
+            variant="secondary"
           />
         </View>
       </View>

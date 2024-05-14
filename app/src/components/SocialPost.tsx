@@ -1,7 +1,8 @@
 import React, { useState, memo } from "react";
-import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, Image, TouchableOpacity } from "react-native";
 import { Icon } from "react-native-elements";
 import DoubleTap from "./DoubleTap"; // Ensure this import is correct based on your project structure
+import { styled } from "nativewind";
 
 interface Post {
   id: string;
@@ -17,6 +18,11 @@ interface SocialPostProps {
   post: Post;
 }
 
+const StyledView = styled(View);
+const StyledText = styled(Text);
+const StyledImage = styled(Image);
+const StyledTouchableOpacity = styled(TouchableOpacity);
+
 const SocialPost: React.FC<SocialPostProps> = memo(({ post }) => {
   const [likes, setLikes] = useState(post.likesCount);
   const [isLiked, setIsLiked] = useState(false);
@@ -31,90 +37,45 @@ const SocialPost: React.FC<SocialPostProps> = memo(({ post }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Image
+    <StyledView className="bg-white border-b border-gray-300 pb-2.5">
+      <StyledView className="flex-row items-center p-2.5">
+        <StyledImage
           source={{ uri: post.userProfilePic }}
-          style={styles.profilePic}
+          className="w-10 h-10 rounded-full mr-2.5"
         />
-        <Text style={styles.username}>{post.username}</Text>
-      </View>
+        <StyledText className="font-bold">{post.username}</StyledText>
+      </StyledView>
       <DoubleTap onDoubleTap={handleLike}>
-        <Image
+        <StyledImage
           source={{ uri: post.imageUrl }}
-          style={styles.postImage}
+          className="w-full h-75"
           resizeMode="cover"
         />
       </DoubleTap>
-      <View style={styles.interactionBar}>
-        <TouchableOpacity onPress={handleLike}>
+      <StyledView className="flex-row justify-start p-2.5">
+        <StyledTouchableOpacity onPress={handleLike}>
           <Icon
             name={isLiked ? "heart" : "heart-outline"}
             type="material-community"
             color={isLiked ? "red" : "black"}
             size={24}
           />
-        </TouchableOpacity>
-        <TouchableOpacity>
+        </StyledTouchableOpacity>
+        <StyledTouchableOpacity>
           <Icon name="comment-outline" type="material-community" size={24} />
-        </TouchableOpacity>
-      </View>
-      <Text style={styles.likes}>{likes} Likes</Text>
-      <Text style={styles.caption}>
+        </StyledTouchableOpacity>
+      </StyledView>
+      <StyledText className="font-bold pl-2.5">{likes} Likes</StyledText>
+      <StyledText className="pl-2.5 pt-1.25">
         {post.username}: {post.caption}
-      </Text>
-      <TouchableOpacity>
-        <Text style={styles.comments}>
+      </StyledText>
+      <StyledTouchableOpacity>
+        <StyledText className="pl-2.5 text-gray-500 pt-1.25">
           View all {post.commentsCount} comments
-        </Text>
-      </TouchableOpacity>
-    </View>
+        </StyledText>
+      </StyledTouchableOpacity>
+    </StyledView>
   );
-});
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#FFF",
-    borderBottomWidth: 1,
-    borderBottomColor: "#CCC",
-    paddingBottom: 10,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 10,
-  },
-  profilePic: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 10,
-  },
-  username: {
-    fontWeight: "bold",
-  },
-  postImage: {
-    width: "100%",
-    height: 300,
-  },
-  interactionBar: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    padding: 10,
-  },
-  likes: {
-    fontWeight: "bold",
-    paddingLeft: 10,
-  },
-  caption: {
-    paddingLeft: 10,
-    paddingTop: 5,
-  },
-  comments: {
-    paddingLeft: 10,
-    color: "gray",
-    paddingTop: 5,
-  },
 });
 
 export default SocialPost;

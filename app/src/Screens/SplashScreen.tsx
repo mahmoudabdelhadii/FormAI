@@ -1,19 +1,22 @@
 import React from "react";
-import { View, StyleSheet, ActivityIndicator } from "react-native";
-
+import { View, ActivityIndicator } from "react-native";
 import LottieView from "lottie-react-native";
+import { styled } from "nativewind";
 
 interface PreSplashProps {
   onAnimationComplete: () => void; // Callback when animation finishes
-  isFetchingUser: Boolean;
+  isFetchingUser: boolean;
 }
+
+const StyledView = styled(View);
+const StyledActivityIndicator = styled(ActivityIndicator);
 
 const PreSplash: React.FC<PreSplashProps> = ({
   onAnimationComplete,
   isFetchingUser,
 }) => {
   return (
-    <View style={styles.container}>
+    <StyledView className="flex-1 justify-center items-center bg-[#048998]">
       <LottieView
         source={require("../assets/splash-pre.lottie.json")}
         autoPlay
@@ -22,17 +25,17 @@ const PreSplash: React.FC<PreSplashProps> = ({
         onAnimationFinish={onAnimationComplete} // Triggering the callback
       />
       {isFetchingUser && (
-        <View style={styles.overlay}>
-          <ActivityIndicator size="large" color="#FFFFFF" />
-        </View>
+        <StyledView className="absolute w-full h-full bg-transparent justify-center items-center pt-[400px]">
+          <StyledActivityIndicator size="large" color="#FFFFFF" />
+        </StyledView>
       )}
-    </View>
+    </StyledView>
   );
 };
 
 const PostSplash: React.FC = () => {
   return (
-    <View style={styles.container}>
+    <StyledView className="flex-1 justify-center items-center bg-[#048998]">
       <LottieView
         source={require("../assets/splash-post.lottie.json")} // Loading final animation
         autoPlay
@@ -42,26 +45,8 @@ const PostSplash: React.FC = () => {
           console.log("app init done");
         }}
       />
-    </View>
+    </StyledView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#048998",
-  },
-  overlay: {
-    position: "absolute",
-    width: "100%",
-    height: "100%",
-    backgroundColor: "rgba(0, 0, 0, 0)", // Reduced opacity for clearer appearance
-    justifyContent: "center",
-    alignItems: "center",
-    paddingTop: 400, // Moves the ActivityIndicator downward
-  },
-});
 
 export { PreSplash, PostSplash };

@@ -1,35 +1,44 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  TextInput,
-  Button,
-  StyleSheet,
-  SafeAreaView,
-} from "react-native";
+import { View, Text, FlatList, TextInput, Button } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { styled } from "nativewind";
 
-const ChatScreen = ({ route }) => {
+interface ChatScreenProps {
+  route: {
+    params: {
+      name: string;
+    };
+  };
+}
+
+const StyledSafeAreaView = styled(SafeAreaView);
+const StyledView = styled(View);
+const StyledText = styled(Text);
+const StyledFlatList = styled(FlatList);
+const StyledTextInput = styled(TextInput);
+const StyledButton = styled(Button);
+
+const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
   const { name } = route.params;
 
   const [messages, setMessages] = useState([
     { id: "1", text: "Hello!", sender: "other" },
     { id: "2", text: "Hi! How are you?", sender: "me" },
     { id: "3", text: "I am good, thanks!", sender: "other" },
-    // Add more messages as needed
   ]);
 
   const [newMessage, setNewMessage] = useState("");
 
   const renderItem = ({ item }) => (
-    <View
-      style={[
-        styles.messageContainer,
-        item.sender === "me" ? styles.myMessage : styles.otherMessage,
-      ]}
+    <StyledView
+      className={`p-2.5 my-1.25 mx-2.5 rounded-lg ${
+        item.sender === "me"
+          ? "bg-[#DCF8C6] self-end"
+          : "bg-[#ECECEC] self-start"
+      }`}
     >
-      <Text style={styles.messageText}>{item.text}</Text>
-    </View>
+      <StyledText className="text-base">{item.text}</StyledText>
+    </StyledView>
   );
 
   const sendMessage = () => {
@@ -47,72 +56,27 @@ const ChatScreen = ({ route }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.header}>{name}</Text>
-      <FlatList
+    <StyledSafeAreaView className="flex-1 bg-white">
+      <StyledText className="text-xl font-bold p-2.5 text-center">
+        {name}
+      </StyledText>
+      <StyledFlatList
         data={messages}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
-        style={styles.messageList}
+        className="flex-1"
       />
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
+      <StyledView className="flex-row p-2.5 border-t border-gray-300">
+        <StyledTextInput
+          className="flex-1 border border-gray-300 rounded-lg px-2.5 mr-2.5"
           value={newMessage}
           onChangeText={setNewMessage}
           placeholder="Type a message"
         />
-        <Button title="Send" onPress={sendMessage} />
-      </View>
-    </SafeAreaView>
+        <StyledButton title="Send" onPress={sendMessage} />
+      </StyledView>
+    </StyledSafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "white",
-  },
-  header: {
-    fontSize: 20,
-    fontWeight: "bold",
-    padding: 10,
-    textAlign: "center",
-  },
-  messageList: {
-    flex: 1,
-  },
-  messageContainer: {
-    padding: 10,
-    marginVertical: 5,
-    marginHorizontal: 10,
-    borderRadius: 10,
-  },
-  myMessage: {
-    backgroundColor: "#DCF8C6",
-    alignSelf: "flex-end",
-  },
-  otherMessage: {
-    backgroundColor: "#ECECEC",
-    alignSelf: "flex-start",
-  },
-  messageText: {
-    fontSize: 16,
-  },
-  inputContainer: {
-    flexDirection: "row",
-    padding: 10,
-    borderTopWidth: 1,
-    borderTopColor: "#ccc",
-  },
-  input: {
-    flex: 1,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    marginRight: 10,
-  },
-});
 
 export default ChatScreen;

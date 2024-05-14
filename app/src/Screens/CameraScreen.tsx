@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, Button, Image, StyleSheet, Alert } from "react-native";
+import { View, Text, Button, Image, Alert } from "react-native";
 import {
   launchCamera,
   launchImageLibrary,
@@ -7,6 +7,12 @@ import {
   ImageLibraryOptions,
   Asset,
 } from "react-native-image-picker";
+import { styled } from "nativewind";
+
+const StyledView = styled(View);
+const StyledText = styled(Text);
+const StyledImage = styled(Image);
+const StyledButton = styled(Button);
 
 const CameraScreen: React.FC = () => {
   const [photo, setPhoto] = useState<Asset | null>(null);
@@ -55,49 +61,27 @@ const CameraScreen: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Take a Photo</Text>
+    <StyledView className="flex-1 justify-center items-center">
+      <StyledText className="text-2xl mb-5">Take a Photo</StyledText>
       {!photo ? (
-        <View style={styles.buttonContainer}>
-          <Button title="Take Photo" onPress={handleTakePhoto} />
-          <Button title="Choose from Gallery" onPress={handleChoosePhoto} />
-        </View>
+        <StyledView className="flex-row justify-around w-4/5">
+          <StyledButton title="Take Photo" onPress={handleTakePhoto} />
+          <StyledButton
+            title="Choose from Gallery"
+            onPress={handleChoosePhoto}
+          />
+        </StyledView>
       ) : (
-        <View style={styles.previewContainer}>
-          <Image source={{ uri: photo.uri }} style={styles.photo} />
-          <View style={styles.buttonContainer}>
-            <Button title="Upload" onPress={handleUpload} />
-            <Button title="Cancel" onPress={handleCancel} />
-          </View>
-        </View>
+        <StyledView className="items-center">
+          <StyledImage source={{ uri: photo.uri }} className="w-75 h-75 mb-5" />
+          <StyledView className="flex-row justify-around w-4/5">
+            <StyledButton title="Upload" onPress={handleUpload} />
+            <StyledButton title="Cancel" onPress={handleCancel} />
+          </StyledView>
+        </StyledView>
       )}
-    </View>
+    </StyledView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 20,
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    width: "80%",
-  },
-  previewContainer: {
-    alignItems: "center",
-  },
-  photo: {
-    width: 300,
-    height: 300,
-    marginBottom: 20,
-  },
-});
 
 export default CameraScreen;

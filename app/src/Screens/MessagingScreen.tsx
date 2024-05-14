@@ -1,6 +1,11 @@
 import React from "react";
-import { View, FlatList, StyleSheet, SafeAreaView } from "react-native";
+import { View, FlatList } from "react-native";
 import MessageItem from "../components/MessageItem";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { styled } from "nativewind";
+
+const StyledSafeAreaView = styled(SafeAreaView);
+const StyledFlatList = styled(FlatList);
 
 const dummyData = [
   {
@@ -21,10 +26,9 @@ const dummyData = [
     photoUrl: "https://example.com/community2.jpg",
     lastMessage: "Welcome to Community 2",
   },
-  // Add more dummy data as needed
 ];
 
-const MessagingScreen = ({ navigation }) => {
+const MessagingScreen: React.FC = ({ navigation }) => {
   const renderItem = ({ item }) => (
     <MessageItem
       name={item.name}
@@ -35,21 +39,14 @@ const MessagingScreen = ({ navigation }) => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <FlatList
+    <StyledSafeAreaView className="flex-1 bg-white">
+      <StyledFlatList
         data={dummyData}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
       />
-    </SafeAreaView>
+    </StyledSafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "white",
-  },
-});
 
 export default MessagingScreen;

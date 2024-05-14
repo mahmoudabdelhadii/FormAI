@@ -2,20 +2,29 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   TextInput,
-  StyleSheet,
   Text,
   TouchableOpacity,
   FlatList,
 } from "react-native";
 import SearchResultItem from "../components/SearchResultItem";
-const SearchTab = () => {
+import { SafeAreaView } from "react-native-safe-area-context";
+import { styled } from "nativewind";
+
+const StyledSafeAreaView = styled(SafeAreaView);
+const StyledView = styled(View);
+const StyledText = styled(Text);
+const StyledTextInput = styled(TextInput);
+const StyledTouchableOpacity = styled(TouchableOpacity);
+const StyledFlatList = styled(FlatList);
+
+const SearchTab: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const [selectedTab, setSelectedTab] = useState("accounts"); // 'accounts' or 'communities'
   const [results, setResults] = useState([]);
-  const inputRef = useRef(null); // Add this line
+  const inputRef = useRef(null);
+
   const fetchData = async () => {
-    // Replace this with your actual data fetching logic
     setResults(
       selectedTab === "accounts"
         ? [
@@ -36,17 +45,19 @@ const SearchTab = () => {
   const handleClearInput = () => {
     setSearchQuery("");
     if (inputRef.current) {
-      inputRef.current.blur(); // Unfocus the text input
+      inputRef.current.blur();
     }
-    setIsFocused(false); // Optionally control focus state
+    setIsFocused(false);
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.searchContainer}>
-        <TextInput
+    <StyledSafeAreaView className="flex-1 p-2.5">
+      <StyledView className="flex-row items-center">
+        <StyledTextInput
           ref={inputRef}
-          style={[styles.searchInput, isFocused && styles.searchInputActive]}
+          className={`flex-1 h-10 border border-gray-400 rounded-lg px-2.5 ${
+            isFocused ? "mr-2.5" : ""
+          }`}
           placeholder={`Search ${selectedTab}`}
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -54,88 +65,39 @@ const SearchTab = () => {
           onBlur={() => setIsFocused(false)}
         />
         {isFocused && (
-          <TouchableOpacity
-            onPress={handleClearInput}
-            style={styles.cancelButton}
-          >
-            <Text style={styles.cancelButtonText}>Cancel</Text>
-          </TouchableOpacity>
+          <StyledTouchableOpacity onPress={handleClearInput} className="p-2.5">
+            <StyledText className="text-lg text-[#007AFF]">Cancel</StyledText>
+          </StyledTouchableOpacity>
         )}
-      </View>
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tab, selectedTab === "accounts" && styles.selectedTab]}
+      </StyledView>
+      <StyledView className="flex-row mt-2.5">
+        <StyledTouchableOpacity
+          className={`flex-1 py-2.5 items-center border-b-2 ${
+            selectedTab === "accounts" ? "border-black" : "border-transparent"
+          }`}
           onPress={() => setSelectedTab("accounts")}
         >
-          <Text style={styles.tabText}>Accounts</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.tab,
-            selectedTab === "communities" && styles.selectedTab,
-          ]}
+          <StyledText className="text-lg">Accounts</StyledText>
+        </StyledTouchableOpacity>
+        <StyledTouchableOpacity
+          className={`flex-1 py-2.5 items-center border-b-2 ${
+            selectedTab === "communities"
+              ? "border-black"
+              : "border-transparent"
+          }`}
           onPress={() => setSelectedTab("communities")}
         >
-          <Text style={styles.tabText}>Communities</Text>
-        </TouchableOpacity>
-      </View>
-      <FlatList
+          <StyledText className="text-lg">Communities</StyledText>
+        </StyledTouchableOpacity>
+      </StyledView>
+      <StyledFlatList
         data={results}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => <SearchResultItem item={item} />}
-        style={styles.resultsList}
+        className="mt-2.5"
       />
-    </View>
+    </StyledSafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 10,
-  },
-  searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  searchInput: {
-    flex: 1,
-    height: 40,
-    borderColor: "gray",
-    borderWidth: 1,
-    paddingLeft: 10,
-    borderRadius: 10,
-  },
-  searchInputActive: {
-    marginRight: 10, // adjust spacing for the cancel button
-  },
-  cancelButton: {
-    padding: 10,
-  },
-  cancelButtonText: {
-    fontSize: 16,
-    color: "#007AFF", // iOS-style blue
-  },
-  tabContainer: {
-    flexDirection: "row",
-    marginTop: 10,
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 10,
-    alignItems: "center",
-    borderBottomWidth: 2,
-    borderBottomColor: "transparent",
-  },
-  selectedTab: {
-    borderBottomColor: "#000",
-  },
-  tabText: {
-    fontSize: 16,
-  },
-  resultsList: {
-    marginTop: 10,
-  },
-});
 
 export default SearchTab;

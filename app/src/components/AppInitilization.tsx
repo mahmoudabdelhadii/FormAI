@@ -51,13 +51,4 @@ const AppInitialization: React.FC<AppInitializationProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#048998", // Background color for the loading stage
-  },
-});
-
 export default AppInitialization;
