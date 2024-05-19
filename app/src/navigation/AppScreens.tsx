@@ -7,16 +7,9 @@ import SearchTab from "../Screens/SearchTab";
 
 import ProfileTab from "../Screens/ProfileTab";
 import CustomAddButton from "../components/AddButton";
-import { TouchableOpacity } from "react-native";
+import { TouchableOpacity, TouchableWithoutFeedback } from "react-native";
 import MessagingScreen from "../Screens/MessagingScreen";
-import {
-  getFocusedRouteNameFromRoute,
-  useNavigation,
-  useFocusEffect,
-  useRoute,
-} from "@react-navigation/native";
-import { Button, Image } from "react-native";
-import * as IconFA6 from "react-native-vector-icons/FontAwesome6";
+
 const MainTab = createBottomTabNavigator();
 
 function AppScreens() {
@@ -24,7 +17,7 @@ function AppScreens() {
     <MainTab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
+          let iconName: string = "";
           if (route.name === "Home") iconName = "home";
           else if (route.name === "Search") iconName = "search";
           else if (route.name === "Add") iconName = "plus";
@@ -58,7 +51,7 @@ function AppScreens() {
       <MainTab.Screen name="Search" component={SearchTab} />
       <MainTab.Screen
         name="Add"
-        component={TouchableOpacity} // Placeholder component
+        component={TouchableWithoutFeedback} // Placeholder component
         listeners={{
           tabPress: (e) => {
             e.preventDefault(); // Prevent the tab from being selected
@@ -74,9 +67,9 @@ function AppScreens() {
             />
           ),
           tabBarButton: (props) => (
-            <TouchableOpacity
+            <TouchableWithoutFeedback
               {...props}
-              activeOpacity={0.7}
+              // activeOpacity={0.7}
               onPress={() => console.log("Add Pressed")}
             />
           ),

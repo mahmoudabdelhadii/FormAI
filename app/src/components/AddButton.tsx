@@ -1,21 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
-  Text,
   TouchableOpacity,
-  StyleSheet,
   Animated,
   TouchableWithoutFeedback,
 } from "react-native";
-import { useNavigation, useIsFocused } from "@react-navigation/native";
+
 import Icon from "react-native-vector-icons/FontAwesome6";
 import * as IconFontAwesome from "react-native-vector-icons/FontAwesome";
+import * as MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { styled } from "nativewind";
-
+import { BlurView } from "expo-blur";
 const StyledView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);
-const StyledText = styled(Text);
 const StyledAnimatedView = styled(Animated.View);
+const StyledTouchableWithoutFeedback = styled(TouchableWithoutFeedback);
 
 type TransformStyle = {
   transform: (
@@ -24,51 +23,35 @@ type TransformStyle = {
     | { scale: Animated.AnimatedInterpolation<number> }
   )[];
 };
-const CustomAddButton = ({ color = "#048998", size = 150, onPress }) => {
-  const [isActive, setIsActive] = useState(false);
-  const animation = new Animated.Value(0);
-  const navigation = useNavigation();
-  const isFocused = useIsFocused(); // Returns true if t
 
-  useEffect(() => {
-    if (!isFocused && isActive) {
-      // If the screen loses focus and the buttons are visible, close them
-      toggleButtons(false);
-    }
-  }, [isFocused]);
+type CustomAddButtonProps = {
+  color?: string;
+  size?: number;
+  onPress?: () => void;
+};
+
+const CustomAddButton: React.FC<CustomAddButtonProps> = ({
+  color = "#048998",
+  size = 150,
+  onPress,
+}) => {
+  const [isActive, setIsActive] = useState(false);
+  const animation = useState(new Animated.Value(0))[0];
 
   const handlePress = () => {
     toggleButtons(!isActive);
   };
-  const handleOverlayPress = () => {
-    toggleButtons(false); // Close the extra buttons when the overlay is pressed
-  };
-  const toggleButtons = (open) => {
-    setIsActive(open);
+
+  const toggleButtons = (open: boolean) => {
     Animated.timing(animation, {
       toValue: open ? 1 : 0,
       duration: 300,
       useNativeDriver: true,
-    }).start();
-    onPress?.(); // Call onPress if it exists
+    }).start(() => setIsActive(open));
+
+    onPress?.();
   };
 
-  useEffect(() => {
-    Animated.timing(animation, {
-      toValue: isActive ? 1 : 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  }, [isActive]);
-  // const handlePress = () => {
-  //   setIsActive(!isActive);
-  //   onPress?.(); // Call onPress if it exists
-  //   Animated.timing(animation, {
-  //     toValue: isActive ? 0 : 1,
-  //     duration: 300,
-  //     useNativeDriver: true,
-  //   }).start();
-  // };
   const rotation = animation.interpolate({
     inputRange: [0, 1],
     outputRange: ["0deg", "45deg"],
@@ -80,46 +63,77 @@ const CustomAddButton = ({ color = "#048998", size = 150, onPress }) => {
   });
 
   const directionalTransform = (
-    direction: "left" | "right" | "top" | "bottom" | null
+    direction: "left" | "right" | "top" | "bottom"
   ): TransformStyle => {
     switch (direction) {
       case "left":
         return {
           transform: [
-            { translateX: Animated.multiply(animation, -size) },
-            { translateY: Animated.multiply(animation, -size) },
+            {
+              translateX: animation.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, -size / 1],
+              }),
+            },
+            {
+              translateY: animation.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, -size / 2],
+              }),
+            },
+            { scale: buttonScale },
           ],
         };
       case "right":
         return {
           transform: [
-            { translateX: Animated.multiply(animation, size) },
-            { translateY: Animated.multiply(animation, -size) },
+            {
+              translateX: animation.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, size / 1],
+              }),
+            },
+            {
+              translateY: animation.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, -size / 2],
+              }),
+            },
+            { scale: buttonScale },
           ],
         };
       case "top":
         return {
           transform: [
-            { translateY: Animated.multiply(animation, -size * 1.5) },
+            {
+              translateY: animation.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, -size / 0.8],
+              }),
+            },
+            { scale: buttonScale },
           ],
         };
       case "bottom":
         return {
-          transform: [{ translateY: Animated.multiply(animation, size) }],
+          transform: [
+            {
+              translateY: animation.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, size / 1.5],
+              }),
+            },
+            { scale: buttonScale },
+          ],
         };
       default:
-        return { transform: [{ translateX: new Animated.Value(0) }] }; // No-op transformation, consider providing a more meaningful default
+        return { transform: [{ translateX: new Animated.Value(0) }] };
     }
   };
 
   return (
     <StyledView className="justify-center items-center absolute bottom-6 self-center z-11">
-      {isActive && (
-        <TouchableWithoutFeedback onPress={handleOverlayPress}>
-          <StyledView className="absolute top-0 left-0 right-0 bottom-0 z-10 bg-transparent" />
-        </TouchableWithoutFeedback>
-      )}
-      <StyledTouchableOpacity onPress={handlePress}>
+      <StyledTouchableWithoutFeedback onPress={handlePress}>
         <StyledAnimatedView
           className="justify-center items-center"
           style={{
@@ -129,29 +143,68 @@ const CustomAddButton = ({ color = "#048998", size = 150, onPress }) => {
             borderRadius: size / 2,
           }}
         >
-          {isActive ? (
-            <IconFontAwesome.default name="close" size={30} color="white" />
-          ) : (
-            <Icon name="dumbbell" size={30} color="white" />
-          )}
-        </StyledAnimatedView>
-      </StyledTouchableOpacity>
-      {isActive &&
-        ["left", "right", "top"].map((direction, index) => (
           <StyledAnimatedView
-            key={index}
-            className="absolute w-17.5 h-17.5 rounded-full bg-[#048998] z-20"
-            style={[
-              {
-                transform: [
-                  ...directionalTransform(direction as any).transform,
-                  { scale: buttonScale },
-                ],
-                opacity: animation,
-              },
-            ]}
-          />
-        ))}
+            style={{
+              position: "absolute",
+              opacity: animation.interpolate({
+                inputRange: [0, 1],
+                outputRange: [1, 0],
+              }),
+            }}
+          >
+            <MaterialCommunityIcons.default
+              name="weight-lifter"
+              size={30}
+              color="white"
+            />
+          </StyledAnimatedView>
+          <StyledAnimatedView
+            style={{
+              position: "absolute",
+              opacity: animation.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 1],
+              }),
+            }}
+          >
+            <IconFontAwesome.default name="close" size={30} color="white" />
+          </StyledAnimatedView>
+        </StyledAnimatedView>
+      </StyledTouchableWithoutFeedback>
+      {["left", "right", "top"].map((direction: any) => (
+        <StyledAnimatedView
+          key={direction}
+          className="absolute w-14 h-14 rounded-full bg-[#048998] justify-center items-center"
+          style={[
+            directionalTransform(direction),
+            {
+              opacity: animation,
+            },
+          ]}
+        >
+          <TouchableOpacity
+            onPress={() =>
+              console.log(
+                `${
+                  direction.charAt(0).toUpperCase() + direction.slice(1)
+                } Pressed`
+              )
+            }
+          >
+            {direction === "left" ? (
+              <Icon name="dumbbell" size={18} color="white" />
+            ) : direction === "right" ? (
+              <Icon name="utensils" size={18} color="white" />
+            ) : (
+              <IconFontAwesome.default
+                name="heartbeat"
+                size={18}
+                color="white"
+              />
+            )}
+          </TouchableOpacity>
+        </StyledAnimatedView>
+      ))}
     </StyledView>
   );
 };

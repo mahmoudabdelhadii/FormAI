@@ -26,7 +26,7 @@ export function useScrollToTop() {
   return useContext(ScrollToTopContext);
 }
 const HomeFeed = () => {
-  const generateDummyPosts = (count) => {
+  const generateDummyPosts = (count: number) => {
     return Array.from({ length: count }).map((_, index) => ({
       id: Math.random().toString(36).substr(2, 9), // Random ID for each new item
       userProfilePic: "https://example.com/profile.jpg",

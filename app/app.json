@@ -12,16 +12,36 @@
     "assetBundlePatterns": [
       "**/*"
     ],
+    "platforms": ["ios", "android"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.Forma"
+      "bundleIdentifier": "com.anonymous.Forma",
+      "infoPlist": {
+        "NSCameraUsageDescription": "We need access to your camera",
+        "NSPhotoLibraryUsageDescription": "We need access to your photo library"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/logo.png",
-        "backgroundColor": "#048998"
+        "backgroundColor": "#048998",
+        "permissions": [
+          "CAMERA",
+          "WRITE_EXTERNAL_STORAGE",
+          "READ_EXTERNAL_STORAGE"
+        ]
       }
     },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+          "recordAudioAndroid": true
+        }
+      ]
+    ],
     "web": {
       "favicon": "./assets/favicon.png"
     }

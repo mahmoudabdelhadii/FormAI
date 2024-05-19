@@ -17,12 +17,16 @@ const StyledTextInput = styled(TextInput);
 const StyledTouchableOpacity = styled(TouchableOpacity);
 const StyledFlatList = styled(FlatList);
 
+type Result = { id: number; name: string };
+
 const SearchTab: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isFocused, setIsFocused] = useState(false);
-  const [selectedTab, setSelectedTab] = useState("accounts"); // 'accounts' or 'communities'
-  const [results, setResults] = useState([]);
-  const inputRef = useRef(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isFocused, setIsFocused] = useState<boolean>(false);
+  const [selectedTab, setSelectedTab] = useState<"accounts" | "communities">(
+    "accounts"
+  );
+  const [results, setResults] = useState<Result[]>([]);
+  const inputRef = useRef<TextInput>(null);
 
   const fetchData = async () => {
     setResults(

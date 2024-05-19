@@ -12,6 +12,7 @@ import {
 } from "@react-navigation/native";
 import { Button, Image } from "react-native";
 import * as IconFA6 from "react-native-vector-icons/FontAwesome6";
+import MediaScreens from "./MediaScreens";
 const Tab = createMaterialTopTabNavigator();
 
 function HomeCombinedScreen() {
@@ -56,7 +57,7 @@ function HomeCombinedScreen() {
         tabBarShowLabel: false, // Show or hide labels
       }}
     >
-      <Tab.Screen name="Camera" component={CameraScreen} />
+      <Tab.Screen name="Media" component={MediaScreens} />
       <Tab.Screen name="HomeFeed" component={HomeFeed} />
       <Tab.Screen name="MessagesTab" component={MessagingTab} />
     </Tab.Navigator>

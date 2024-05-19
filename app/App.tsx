@@ -14,7 +14,7 @@ const StyledText = styled(Text);
 export default function App() {
   const [isAppInit, setIsAppInit] = useState<boolean>(false);
 
-  let [fontsLoaded] = useFonts({
+  const [fontsLoaded] = useFonts({
     Inter_900Black,
   });
 

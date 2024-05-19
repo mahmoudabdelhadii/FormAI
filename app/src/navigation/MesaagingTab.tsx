@@ -4,14 +4,14 @@ import { createStackNavigator } from "@react-navigation/stack";
 import MessagingScreen from "../Screens/MessagingScreen";
 import ChatScreen from "../Screens/ChatScreen"; // This would be your detailed chat screen
 
-const Stack = createStackNavigator();
+const MessagingStack = createStackNavigator();
 
 const MessagingTab = () => {
   return (
-    <Stack.Navigator>
-      <Stack.Screen name="Messages" component={MessagingScreen} />
-      <Stack.Screen name="Chat" component={ChatScreen} />
-    </Stack.Navigator>
+    <MessagingStack.Navigator>
+      <MessagingStack.Screen name="Messages" component={MessagingScreen} />
+      <MessagingStack.Screen name="Chat" component={ChatScreen} />
+    </MessagingStack.Navigator>
   );
 };
 
