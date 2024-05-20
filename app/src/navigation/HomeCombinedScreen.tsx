@@ -1,18 +1,16 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect } from "react";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
-
 import HomeFeed from "../Screens/HomeFeed";
 import CameraScreen from "../Screens/CameraScreen";
-import MessagingTab from "./MesaagingTab";
+import MessagingTab from "../navigation/MesaagingTab";
 import {
   getFocusedRouteNameFromRoute,
   useNavigation,
-  useFocusEffect,
   useRoute,
 } from "@react-navigation/native";
 import { Button, Image } from "react-native";
-import * as IconFA6 from "react-native-vector-icons/FontAwesome6";
 import MediaScreens from "./MediaScreens";
+
 const Tab = createMaterialTopTabNavigator();
 
 function HomeCombinedScreen() {
@@ -21,8 +19,6 @@ function HomeCombinedScreen() {
 
   useEffect(() => {
     const routeName = getFocusedRouteNameFromRoute(route) ?? route.name;
-
-    console.log("route: ", routeName);
 
     if (routeName === "HomeFeed") {
       navigation.setOptions({
@@ -47,14 +43,15 @@ function HomeCombinedScreen() {
       });
     }
   }, [navigation, route]);
+
   return (
     <Tab.Navigator
       initialRouteName="HomeFeed"
       screenOptions={{
-        tabBarStyle: { height: 0, display: "none" }, // Set the height to 0 to hide the tab bar
-        swipeEnabled: true, // Enable swiping between screens
-        tabBarIndicatorStyle: { top: 0 }, // Hide indicator
-        tabBarShowLabel: false, // Show or hide labels
+        tabBarStyle: { height: 0, display: "none" },
+        swipeEnabled: true,
+        tabBarIndicatorStyle: { top: 0 },
+        tabBarShowLabel: false,
       }}
     >
       <Tab.Screen name="Media" component={MediaScreens} />

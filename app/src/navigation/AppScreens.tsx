@@ -1,18 +1,25 @@
-import React, { useEffect, useCallback } from "react";
+import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-
 import Icon from "react-native-vector-icons/FontAwesome";
 import HomeCombinedScreen from "./HomeCombinedScreen";
 import SearchTab from "../Screens/SearchTab";
-
 import ProfileTab from "../Screens/ProfileTab";
 import CustomAddButton from "../components/AddButton";
 import { TouchableOpacity, TouchableWithoutFeedback } from "react-native";
 import MessagingScreen from "../Screens/MessagingScreen";
+import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 
 const MainTab = createBottomTabNavigator();
 
 function AppScreens() {
+  const getTabBarVisibility = (route: any) => {
+    const routeName = getFocusedRouteNameFromRoute(route) ?? "HomeFeed";
+    if (routeName === "Media") {
+      return "none";
+    }
+    return "flex";
+  };
+
   return (
     <MainTab.Navigator
       screenOptions={({ route }) => ({
@@ -42,8 +49,9 @@ function AppScreens() {
         tabBarStyle: {
           backgroundColor: "black",
           borderTopColor: "transparent",
-          height: 60,
-          paddingBottom: 5,
+          height: 90,
+          paddingBottom: 30,
+          display: getTabBarVisibility(route),
         },
       })}
     >

@@ -1,5 +1,11 @@
-import React, { useRef, useState } from "react";
-import { View, Text, TouchableOpacity, Button } from "react-native";
+import React, { useRef, useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Button,
+  PanResponder,
+} from "react-native";
 import {
   CameraType,
   FlashMode,
@@ -41,6 +47,66 @@ const CameraScreen: React.FC = () => {
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const [microphonePermission, requestMicrophonePermission] =
     useMicrophonePermissions();
+
+  useEffect(() => {
+    if (cameraRef.current) {
+      console.log("cameraRef.current:", cameraRef.current);
+      console.log(
+        "recordAsync function:",
+        typeof cameraRef.current.recordAsync === "function"
+      );
+      console.log(
+        "stopRecording function:",
+        typeof cameraRef.current.stopRecording === "function"
+      );
+      console.log("camera permission: ", cameraPermission);
+      console.log("microphone permission: ", microphonePermission);
+    }
+  }, [cameraRef]);
+  const startRecording = async () => {
+    if (cameraRef.current && !isRecording) {
+      try {
+        console.log("Starting video recording...");
+        setIsRecording(true);
+        const videoRecordPromise = cameraRef.current.recordAsync();
+        const data = await videoRecordPromise;
+        const source = data?.uri;
+        if (source) {
+          console.log("Video source:", source);
+          navigation.navigate("MediaPreview", {
+            uri: source,
+            type: "video",
+          });
+        } else {
+          console.log("No video source returned.");
+        }
+      } catch (error) {
+        console.error("Error recording video:", error);
+      } finally {
+        setIsRecording(false);
+      }
+    }
+  };
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: () => {
+        startRecording();
+      },
+      onPanResponderMove: (_, gestureState) => {
+        if (gestureState.dx > 100) {
+          // User swiped right
+          console.log("User swiped right while recording");
+        }
+      },
+      onPanResponderRelease: () => {
+        stopRecording();
+      },
+    })
+  ).current;
+
   if (!cameraPermission || !microphonePermission) {
     return <View />;
   }
@@ -86,32 +152,12 @@ const CameraScreen: React.FC = () => {
     }
   };
 
-  const recordVideo = async () => {
-    if (cameraReady && cameraRef.current) {
-      try {
-        setIsRecording(true);
-        const video = await cameraRef.current.recordAsync({
-          maxDuration: 60,
-        });
-        console.log(video);
-        if (video) {
-          navigation.navigate("MediaPreview", {
-            uri: video.uri,
-            type: "video",
-          });
-        }
-      } catch (error) {
-        console.error("Error recording video:", error);
-      } finally {
-        setIsRecording(false);
-      }
-    }
-  };
-
   const stopRecording = () => {
     if (cameraReady && cameraRef.current && isRecording) {
+      console.log("Stopping recording...");
       try {
         cameraRef.current.stopRecording();
+        console.log("Stopped recording");
       } catch (error) {
         console.error("Error stopping recording:", error);
       } finally {
@@ -158,16 +204,17 @@ const CameraScreen: React.FC = () => {
 
   return (
     <StyledSafeAreaView className="flex-1 bg-black">
-      <GestureHandlerRootView className="flex-1">
+      <CameraView
+        ref={cameraRef}
+        style={{ flex: 1 }}
+        facing={facing}
+        flash={flash}
+        onCameraReady={() => setCameraReady(true)}
+        mode="video"
+      />
+      <GestureHandlerRootView className="absolute top-0 bottom-0 left-0 right-0">
         <TapGestureHandler onActivated={handleDoubleTap} numberOfTaps={2}>
-          <StyledView className="flex-1">
-            <CameraView
-              ref={cameraRef}
-              style={{ flex: 1 }}
-              facing={facing}
-              flash={flash}
-              onCameraReady={() => setCameraReady(true)}
-            />
+          <StyledSafeAreaView className="flex-1">
             <StyledView className="absolute top-0 w-full flex-row justify-between px-4 py-2">
               <StyledTouchableOpacity
                 onPress={toggleFlash}
@@ -192,10 +239,14 @@ const CameraScreen: React.FC = () => {
                 />
               </StyledTouchableOpacity>
             </StyledView>
-            <StyledView className="absolute bottom-10 w-full flex-row justify-center">
+            <StyledView
+              className="absolute bottom-10 w-full flex-row justify-center"
+              {...panResponder.panHandlers}
+            >
               <StyledTouchableOpacity
-                onPress={isRecording ? stopRecording : takePhoto}
-                onLongPress={recordVideo}
+                onPress={takePhoto}
+                onLongPress={startRecording}
+                onPressOut={stopRecording}
                 className="bg-red-500 rounded-full"
                 style={{
                   width: 70,
@@ -212,7 +263,7 @@ const CameraScreen: React.FC = () => {
                 )}
               </StyledTouchableOpacity>
             </StyledView>
-          </StyledView>
+          </StyledSafeAreaView>
         </TapGestureHandler>
       </GestureHandlerRootView>
     </StyledSafeAreaView>
