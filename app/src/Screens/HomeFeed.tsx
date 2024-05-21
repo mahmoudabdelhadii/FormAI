@@ -12,26 +12,34 @@ import {
   ActivityIndicator,
   RefreshControl,
   Button,
+  View,
   FlatListProps,
 } from "react-native";
 import SocialPost from "../components/SocialPost";
 import { styled } from "nativewind";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import { useNavigation } from "@react-navigation/core";
+
 interface ScrollToTopContextType {
   scrollToTop: () => void;
 }
 const StyledSafeAreaView = styled(SafeAreaView);
+const StyledView = styled(View);
 const ScrollToTopContext = createContext({ scrollToTop: () => {} });
 
 export function useScrollToTop() {
   return useContext(ScrollToTopContext);
 }
 const HomeFeed = () => {
+  const navigation = useNavigation();
+  let url = "";
   const generateDummyPosts = (count: number) => {
     return Array.from({ length: count }).map((_, index) => ({
       id: Math.random().toString(36).substr(2, 9), // Random ID for each new item
-      userProfilePic: "https://example.com/profile.jpg",
+      userProfilePic: url,
       username: `user_${index}`,
-      imageUrl: `https://example.com/post${index}.jpg`,
+      imageUrl: url,
       likesCount: Math.floor(Math.random() * 100) + 10,
       caption: `Post number ${
         index + 1
@@ -78,7 +86,8 @@ const HomeFeed = () => {
 
   const value = { scrollToTop };
   return (
-    <StyledSafeAreaView className="flex-1 bg-white">
+    <StyledView className="flex-1 bg-white">
+      <Header />
       <FlatList
         ref={flatListRef} // Attach the ref
         data={data}
@@ -92,7 +101,8 @@ const HomeFeed = () => {
         onEndReachedThreshold={0.5} // Trigger the call earlier
         showsVerticalScrollIndicator={false}
       />
-    </StyledSafeAreaView>
+      <Footer navigation={navigation} />
+    </StyledView>
   );
 };
 

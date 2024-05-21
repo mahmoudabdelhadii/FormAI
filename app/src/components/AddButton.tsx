@@ -5,12 +5,12 @@ import {
   Animated,
   TouchableWithoutFeedback,
 } from "react-native";
-
 import Icon from "react-native-vector-icons/FontAwesome6";
 import * as IconFontAwesome from "react-native-vector-icons/FontAwesome";
 import * as MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { styled } from "nativewind";
-import { BlurView } from "expo-blur";
+import { useNavigation } from "@react-navigation/core";
+
 const StyledView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);
 const StyledAnimatedView = styled(Animated.View);
@@ -28,18 +28,22 @@ type CustomAddButtonProps = {
   color?: string;
   size?: number;
   onPress?: () => void;
+  component?: boolean;
 };
 
 const CustomAddButton: React.FC<CustomAddButtonProps> = ({
   color = "#048998",
   size = 150,
   onPress,
+  component = false,
 }) => {
   const [isActive, setIsActive] = useState(false);
   const animation = useState(new Animated.Value(0))[0];
+  const navigation = useNavigation();
 
   const handlePress = () => {
-    toggleButtons(!isActive);
+    const newIsActive = !isActive;
+    toggleButtons(newIsActive);
   };
 
   const toggleButtons = (open: boolean) => {
@@ -49,7 +53,9 @@ const CustomAddButton: React.FC<CustomAddButtonProps> = ({
       useNativeDriver: true,
     }).start(() => setIsActive(open));
 
-    onPress?.();
+    if (!open && onPress) {
+      onPress();
+    }
   };
 
   const rotation = animation.interpolate({
@@ -132,7 +138,13 @@ const CustomAddButton: React.FC<CustomAddButtonProps> = ({
   };
 
   return (
-    <StyledView className="justify-center items-center absolute bottom-6 self-center z-11">
+    <StyledView
+      className={
+        component
+          ? "justify-center items-center self-center z-99"
+          : "justify-center items-center absolute bottom-6 self-center z-99"
+      }
+    >
       <StyledTouchableWithoutFeedback onPress={handlePress}>
         <StyledAnimatedView
           className="justify-center items-center"
@@ -141,6 +153,7 @@ const CustomAddButton: React.FC<CustomAddButtonProps> = ({
             width: size,
             height: size,
             borderRadius: size / 2,
+            transform: [{ rotate: rotation }],
           }}
         >
           <StyledAnimatedView
@@ -174,7 +187,7 @@ const CustomAddButton: React.FC<CustomAddButtonProps> = ({
       {["left", "right", "top"].map((direction: any) => (
         <StyledAnimatedView
           key={direction}
-          className="absolute w-14 h-14 rounded-full bg-[#048998] justify-center items-center"
+          className="absolute w-14 h-14 rounded-full bg-[#048998] justify-center items-center z-99"
           style={[
             directionalTransform(direction),
             {
@@ -182,13 +195,16 @@ const CustomAddButton: React.FC<CustomAddButtonProps> = ({
             },
           ]}
         >
-          <TouchableOpacity
+          <StyledTouchableOpacity
             onPress={() =>
-              console.log(
-                `${
-                  direction.charAt(0).toUpperCase() + direction.slice(1)
-                } Pressed`
-              )
+              navigation.navigate("CustomButton", {
+                screen:
+                  direction === "left"
+                    ? "Activity"
+                    : direction === "right"
+                    ? "Meals"
+                    : "Health",
+              })
             }
           >
             {direction === "left" ? (
@@ -202,7 +218,7 @@ const CustomAddButton: React.FC<CustomAddButtonProps> = ({
                 color="white"
               />
             )}
-          </TouchableOpacity>
+          </StyledTouchableOpacity>
         </StyledAnimatedView>
       ))}
     </StyledView>

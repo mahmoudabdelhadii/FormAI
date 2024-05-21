@@ -2,6 +2,7 @@
 import type { Request, Response } from 'express';
 import prisma from "../utils/prisma"
 import { equal } from 'assert';
+import generateSignedUrl from '../utils/SignedUrl';
 
 const getCommunities = async (req:Request, res:Response) => {
     try {
@@ -18,7 +19,7 @@ const getCommunities = async (req:Request, res:Response) => {
       const community = await prisma.community.findFirst({
         relationLoadStrategy: 'join', 
         where: {
-          id: parseInt(communityId),
+          id: communityId,
           
         },
         include: {
@@ -70,7 +71,7 @@ const getCommunities = async (req:Request, res:Response) => {
       const { communityId } = req.params;
       const moderators = await prisma.communityUser.findMany({
         where: {
-          community: parseInt(communityId), 
+          community: communityId, 
           role: 2
         },
         include:{
@@ -96,7 +97,7 @@ const getCommunities = async (req:Request, res:Response) => {
       }
       const community = await prisma.communityUser.findMany({
         where:{
-          community: parseInt(communityId.toString()),
+          community: communityId.toString(),
           role: 2
         },
         select:{
@@ -122,6 +123,23 @@ const getCommunities = async (req:Request, res:Response) => {
     }
   };
   
+
+  const getSignedUrl = async (req:Request, res:Response) => {
+    try {
+      const { url } = req.body;
+     
+      if (!url) {
+        return res.status(400).json({ message: 'Object path (url) is required' });
+      }
+      const data = generateSignedUrl(url)
+     
+      res.status(200).json({ message: data });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Error signing url" });
+    }
+  };
+
   // const removeModerator = async (req:Request, res:Response) => {
   //   try {
   //     const { communityId, moderatorId } = req.query;
@@ -150,4 +168,4 @@ const getCommunities = async (req:Request, res:Response) => {
   //   }
   // };
 
-  export {getCommunities,getCommunity,getModerators,addModerator}
+  export {getSignedUrl,getCommunities,getCommunity,getModerators,addModerator}

@@ -8,7 +8,7 @@ const MessagingStack = createStackNavigator();
 
 const MessagingTab = () => {
   return (
-    <MessagingStack.Navigator>
+    <MessagingStack.Navigator screenOptions={{ headerShown: false }}>
       <MessagingStack.Screen name="Messages" component={MessagingScreen} />
       <MessagingStack.Screen name="Chat" component={ChatScreen} />
     </MessagingStack.Navigator>

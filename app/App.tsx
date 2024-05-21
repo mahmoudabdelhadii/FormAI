@@ -3,7 +3,7 @@ import { Text, View } from "react-native";
 import Home from "./src/navigation/navigation";
 import { Provider } from "react-redux";
 import store from "./src/state-managment/store";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useFonts, Inter_900Black } from "@expo-google-fonts/inter";
 import AppInitialization from "./src/components/AppInitilization";
 import { styled } from "nativewind";

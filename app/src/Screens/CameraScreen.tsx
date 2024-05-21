@@ -48,40 +48,34 @@ const CameraScreen: React.FC = () => {
   const [microphonePermission, requestMicrophonePermission] =
     useMicrophonePermissions();
 
-  useEffect(() => {
-    if (cameraRef.current) {
-      console.log("cameraRef.current:", cameraRef.current);
-      console.log(
-        "recordAsync function:",
-        typeof cameraRef.current.recordAsync === "function"
-      );
-      console.log(
-        "stopRecording function:",
-        typeof cameraRef.current.stopRecording === "function"
-      );
-      console.log("camera permission: ", cameraPermission);
-      console.log("microphone permission: ", microphonePermission);
-    }
-  }, [cameraRef]);
   const startRecording = async () => {
     if (cameraRef.current && !isRecording) {
       try {
-        console.log("Starting video recording...");
         setIsRecording(true);
         const videoRecordPromise = cameraRef.current.recordAsync();
         const data = await videoRecordPromise;
         const source = data?.uri;
         if (source) {
-          console.log("Video source:", source);
           navigation.navigate("MediaPreview", {
             uri: source,
             type: "video",
           });
         } else {
-          console.log("No video source returned.");
         }
       } catch (error) {
         console.error("Error recording video:", error);
+      } finally {
+        setIsRecording(false);
+      }
+    }
+  };
+
+  const stopRecording = () => {
+    if (cameraReady && cameraRef.current && isRecording) {
+      try {
+        cameraRef.current.stopRecording();
+      } catch (error) {
+        console.error("Error stopping recording:", error);
       } finally {
         setIsRecording(false);
       }
@@ -142,26 +136,11 @@ const CameraScreen: React.FC = () => {
   const takePhoto = async () => {
     if (cameraReady && cameraRef.current) {
       const photo = await cameraRef.current.takePictureAsync();
-      console.log(photo);
       if (photo) {
         navigation.navigate("MediaPreview", {
           uri: photo.uri,
           type: "photo",
         });
-      }
-    }
-  };
-
-  const stopRecording = () => {
-    if (cameraReady && cameraRef.current && isRecording) {
-      console.log("Stopping recording...");
-      try {
-        cameraRef.current.stopRecording();
-        console.log("Stopped recording");
-      } catch (error) {
-        console.error("Error stopping recording:", error);
-      } finally {
-        setIsRecording(false);
       }
     }
   };
@@ -212,10 +191,10 @@ const CameraScreen: React.FC = () => {
         onCameraReady={() => setCameraReady(true)}
         mode="video"
       />
-      <GestureHandlerRootView className="absolute top-0 bottom-0 left-0 right-0">
+      <GestureHandlerRootView className="absolute top-0 bottom-0 left-0 right-0 py-8">
         <TapGestureHandler onActivated={handleDoubleTap} numberOfTaps={2}>
           <StyledSafeAreaView className="flex-1">
-            <StyledView className="absolute top-0 w-full flex-row justify-between px-4 py-2">
+            <StyledSafeAreaView className="absolute top-0 w-full flex-row justify-between px-4 py-2">
               <StyledTouchableOpacity
                 onPress={toggleFlash}
                 className="bg-gray-700 p-3 rounded-full"
@@ -238,7 +217,7 @@ const CameraScreen: React.FC = () => {
                   color="white"
                 />
               </StyledTouchableOpacity>
-            </StyledView>
+            </StyledSafeAreaView>
             <StyledView
               className="absolute bottom-10 w-full flex-row justify-center"
               {...panResponder.panHandlers}
