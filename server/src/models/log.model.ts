@@ -1,25 +1,19 @@
-const mongoose = require("mongoose");
-const {
-  encryptField,
-  decryptField,
-  decryptData,
-} = require("../utils/encryption");
+
 
 
 import { z } from 'zod';
 
 // Schema for Log
 const LogSchema = z.object({
-  id: z.number().int(),
-  email: z.string().optional(),
-  context: z.string().optional(),
+  id: z.string().uuid().optional(),
+  user: z.string().uuid().optional(),
+  context: z.string().uuid().optional(),
   message: z.string().optional(),
-  type: z.string().optional(),
-  level: z.string().optional(),
+  type: z.number().int().optional(),
+  level: z.number().int().optional(),
   timestamp: z.date().optional(),
 });
 
-
-export { LogSchema };
+export default LogSchema;
 
 type Log = z.infer<typeof LogSchema>;

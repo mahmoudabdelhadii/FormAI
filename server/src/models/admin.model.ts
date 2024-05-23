@@ -13,7 +13,7 @@ const AdminSchema = z.object({
   updatedAt: z.date().optional(),
 });
 
-export default { AdminSchema };
+export default  AdminSchema;
 
 
 type Admin = z.infer<typeof AdminSchema>;

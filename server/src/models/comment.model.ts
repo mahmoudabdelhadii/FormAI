@@ -5,12 +5,13 @@ import { z } from 'zod';
 
 // Schema for Comment
 const CommentSchema = z.object({
-  id: z.number().int(),
-  body: z.string().optional(),
-  user: z.string(),
-  post: z.number().int(),
+  id: z.string().uuid().optional(),
+  body: z.string().trim().max(1000, "Comment body must be no more than 1000 characters long").optional(),
+  user: z.string().uuid(),
+  post: z.string().uuid(),
 });
 
-export default { CommentSchema };
+export default CommentSchema;
 
 type Comment = z.infer<typeof CommentSchema>;
+

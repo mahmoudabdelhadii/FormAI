@@ -1,8 +1,35 @@
 import { z } from 'zod';
-import { Prisma } from '@prisma/client';
+
+const CommunityUserSchema = z.object({
+  create: z.array(
+    z.object({
+      community: z.string().uuid(),
+      role: z.number().int(),
+      verifiedAt: z.date().optional(),
+    })
+  ).optional(),
+  connect: z.array(
+    z.object({
+      id: z.string().uuid(),
+    })
+  ).optional(),
+});
+
+const TokenSchema = z.object({
+  create: z.object({
+    id: z.string().uuid().optional(),
+    refreshToken: z.string().optional(),
+    accessToken: z.string().optional(),
+    createdAt: z.date().optional(),
+    salt: z.number().int(),
+  }).optional(),
+  connect: z.object({
+    id: z.string().uuid(),
+  }).optional(),
+});
 
 const UserSchema = z.object({
-  id: z.string().uuid().optional(), // UUID string, optional since it's usually auto-generated
+  id: z.string().uuid().optional(),
   username: z.string().trim().min(3, "Username must be at least 3 characters long").max(20, "Username must be no more than 20 characters long").refine(value => /^[a-zA-Z0-9]+$/.test(value), {
     message: "Username can only contain alphanumeric characters",
   }),
@@ -12,7 +39,8 @@ const UserSchema = z.object({
   password: z.string().min(8).superRefine((password, checkPassComplexity) => {
     const containsUppercase = (ch: string) => /[A-Z]/.test(ch);
     const containsLowercase = (ch: string) => /[a-z]/.test(ch);
-    const containsSpecialChar = (ch: string) => /[`!@#$%^&*()_\-+=\[\]{};':"\\|,.<>\/?~ ]/.test(ch);
+    const containsSpecialChar = (ch: string) =>
+      /[`!@#$%^&*()_\-+=\[\]{};':"\\|,.<>\/?~ ]/.test(ch);
     let countOfUpperCase = 0,
       countOfLowerCase = 0,
       countOfNumbers = 0,
@@ -61,22 +89,14 @@ const UserSchema = z.object({
         message: JSON.stringify(errObj), // Convert errObj to a string
       });
     }
-  }), // You may want to enforce password policies here
+  }),
   avatarUrl: z.string().optional(),
   bio: z.string().optional(),
-  createdAt: z.date().optional(), // Defaults to current time when creating new records
+  createdAt: z.date(),
   isEmailVerified: z.boolean().default(false),
   height: z.number().optional(),
   weight: z.number().optional(),
   age: z.number().int().optional(),
-  CommunityUser: z.object({
-    create: z.array(z.any()).optional(),
-    connect: z.array(z.object({ id: z.string().uuid() })).optional()
-  }).optional(), // Adjust this to match your actual schema for CommunityUser
-  Token: z.object({
-    create: z.array(z.any()).optional(),
-    connect: z.array(z.object({ id: z.string().uuid() })).optional()
-  }).optional() // Adjust this to match your actual schema for Token
 });
 
 export default UserSchema;

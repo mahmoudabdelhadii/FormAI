@@ -1,7 +1,7 @@
 import { z } from 'zod';
 // Schema for Context
-const suspiciousLoginSchema = z.object({
-  id: z.number().int(),
+const SuspiciousLoginSchema = z.object({
+  id: z.string(),
   user: z.string().optional(),
   email: z.string().optional(),
   ip: z.string().optional(),
@@ -16,6 +16,6 @@ const suspiciousLoginSchema = z.object({
   timestamp:z.date()
 });
 
-export { suspiciousLoginSchema };
+export default SuspiciousLoginSchema;
 
-export type suspiciousLogin = z.infer<typeof suspiciousLoginSchema>;
+export type suspiciousLogin = z.infer<typeof SuspiciousLoginSchema>;

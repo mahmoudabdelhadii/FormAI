@@ -1,6 +1,7 @@
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["relationJoins"]
+ output   = "../src/generated/client"
   binaryTargets   = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -10,42 +11,43 @@ datasource db {
 }
 
 model Admin {
-  id         String       @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
-  username   String?      @unique @db.VarChar
-  password   String?      @db.VarChar
+  id         String      @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
+  username   String?     @unique @db.VarChar
+  password   String?     @db.VarChar
   AdminToken AdminToken?
 }
 
 model AdminToken {
   id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
-  user        String  @db.VarChar @unique
+  user        String  @unique @db.VarChar
   accessToken String? @db.VarChar
-  Admin       Admin?  @relation(fields: [user], references: [username])
+  Admin       Admin   @relation(fields: [user], references: [username])
 }
 
 model BannedUsers {
-  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar 
-  community String     @db.VarChar
-  user      String     @db.VarChar
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
+  community String    @db.VarChar
+  user      String    @db.VarChar
   reasonId  String?
-  Community Community? @relation(fields: [community], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Community Community @relation(fields: [community], references: [id], onDelete: Cascade)
 }
 
 model Comment {
-  id   String @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
+  id   String  @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
   body String? @db.VarChar
-  user String @db.VarChar
-  post String @db.VarChar
-  Post Post? @relation(fields: [post], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user String  @db.VarChar
+  post String  @db.VarChar
+  Post Post    @relation(fields: [post], references: [id], onDelete: Cascade)
 }
 
 model Community {
-  id               String               @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
-  name             String?              @db.VarChar
-  description      String?              @db.VarChar
-  CommunityUser    CommunityUser[]
-  CommunityRequest CommunityRequest[]
+  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
+  name             String?            @db.VarChar
+  description      String?            @db.VarChar
   BannedUsers      BannedUsers[]
+  CommunityRequest CommunityRequest[]
+  CommunityUser    CommunityUser[]
+   Post             Post[]
 }
 
 model CommunityRequest {
@@ -54,28 +56,31 @@ model CommunityRequest {
   community   String?    @db.VarChar
   requestedAt DateTime?  @default(now()) @db.Timestamp(6)
   message     String?    @db.VarChar
-  Community   Community? @relation(fields: [community], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Community   Community? @relation(fields: [community], references: [id], onDelete: Cascade)
 
   @@unique([user, community])
 }
 
 model Context {
-  id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
-  user       String? @db.VarChar
-  ip         String? @db.VarChar
-  country    String? @db.VarChar
-  city       String? @db.VarChar
-  os         String? @db.VarChar
-  device     String? @db.VarChar
-  deviceType String? @db.VarChar
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
+  ip         String?  @db.VarChar
+  country    String?  @db.VarChar
+  city       String?  @db.VarChar
+  os         String?  @db.VarChar
+  device     String?  @db.VarChar
+  deviceType String?  @db.VarChar
   isTrusted  Boolean?
+  browser    String?  @db.VarChar
+  platform   String?  @db.VarChar
+  userId     String   @unique @db.VarChar
+  user       User     @relation(fields: [userId], references: [id])
 }
 
 model Like {
   id   String @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
   user String @db.VarChar
   post String @db.VarChar
-  Post Post? @relation(fields: [post], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Post Post   @relation(fields: [post], references: [id], onDelete: Cascade)
 
   @@unique([user, post])
 }
@@ -88,36 +93,45 @@ model Log {
   type      Int?
   level     Int?
   timestamp DateTime? @default(now()) @db.Timestamp(6)
-  LogLevel  LogLevel? @relation(fields: [level], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  LogType   LogType?  @relation(fields: [type], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  LogLevel  LogLevel? @relation(fields: [level], references: [id], onDelete: Cascade)
+  LogType   LogType?  @relation(fields: [type], references: [id], onDelete: Cascade)
 }
 
 model PendingPost {
-  id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
-  content           String?            @db.VarChar
-  fileUrl           String             @db.VarChar
-  community         String             @db.VarChar
-  user              String             @db.VarChar
-  caption           String?            @db.VarChar
-  status            String?            @db.VarChar
-  confirmationToken String?            @db.VarChar
-  PendingPostStatus PendingPostStatus[]
+  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
+  content           String?             @db.VarChar
+  fileUrl           String              @db.VarChar
+  community         String              @db.VarChar
+  user              String              @db.VarChar
+  caption           String?             @db.VarChar
+  status            String?             @db.VarChar
+  confirmationToken String?             @db.VarChar
+  PendingPostStatus PendingPostStatus[] @relation("PendingPostToPendingPostStatus")
+}
+enum PostVisibility {
+  PUBLIC
+  FRIENDS
+  COMMUNITY
 }
 
 model Post {
   id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
   content   String?   @db.VarChar
   fileUrl   String    @db.VarChar
-  community String    @db.VarChar
+  community String?    @db.VarChar
   user      String    @db.VarChar
   caption   String?   @db.VarChar
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  visibility  PostVisibility @default(PUBLIC)
   Comment   Comment[]
   Like      Like[]
+  Community Community? @relation(fields: [community], references: [id], onDelete: Cascade)
+  User      User      @relation(fields: [user], references: [id], onDelete: Cascade)
 }
 
 model Preferences {
   id                     String   @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
-  user                   String?  @db.VarChar
+  user                   String   @unique @db.VarChar
   enableContextBasedAuth Boolean?
 }
 
@@ -125,6 +139,11 @@ model Relationship {
   id        String @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
   follower  String @db.VarChar
   following String @db.VarChar
+
+  followerUser  User @relation("Following", fields: [follower], references: [id])
+  followingUser User @relation("Followers", fields: [following], references: [id])
+  
+  @@unique([follower, following])
 }
 
 model Report {
@@ -138,12 +157,11 @@ model Report {
 
 model Token {
   id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
-  user         String    @db.VarChar @unique
-  refreshToken String?   @db.VarChar
-  accessToken  String?   @db.VarChar
+  user         String    @unique @db.VarChar
+  refreshToken String   @unique @db.VarChar
+  accessToken  String   @unique @db.VarChar
   createdAt    DateTime? @default(now()) @db.Timestamp(6)
-  salt         Int
- User         User      @relation(fields: [user], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  User         User      @relation(fields: [user], references: [id], onDelete: Cascade)
 }
 
 model User {
@@ -151,22 +169,27 @@ model User {
   username        String          @unique @db.VarChar
   firstName       String          @db.VarChar
   lastName        String          @db.VarChar
-  email           String          @db.VarChar
+  email           String          @unique @db.VarChar
   password        String          @db.VarChar
   avatarUrl       String?         @db.VarChar
   bio             String?         @db.VarChar
-  createdAt       DateTime?       @default(now()) @db.Timestamp(6)
-  isEmailVerified Boolean?        @default(false)
+  createdAt       DateTime?        @default(now()) @db.Timestamp(6)
+  isEmailVerified Boolean         @default(false)
   height          Float?
   weight          Float?
   age             Int?
   CommunityUser   CommunityUser[]
- Token           Token?
+  context         Context?
+  Token           Token?
+  posts           Post[]
+  followers       Relationship[]  @relation("Followers")
+  following       Relationship[]  @relation("Following")
+
 }
 
 model UserRoles {
-  id            Int            @id @default(autoincrement())
-  role          String?        @unique @db.VarChar
+  id            Int             @id @default(autoincrement())
+  role          String         @unique @db.VarChar
   CommunityUser CommunityUser[]
 }
 
@@ -175,49 +198,49 @@ model Email {
   email            String?   @db.VarChar
   verificationCode String?   @db.VarChar
   messageId        String?   @db.VarChar
-  for              Int?
+  for              Int?    
   createdAt        DateTime? @default(now()) @db.Timestamp(6)
-  EmailFor         EmailFor? @relation(fields: [for], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  EmailFor         EmailFor? @relation(fields: [for], references: [id])
 }
 
 model EmailFor {
   id    Int     @id @default(autoincrement())
-  for   String? @db.VarChar
+  for   String  @db.VarChar
   Email Email[]
 }
 
 model Leaderboard {
-  id                    String                    @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
-  community             String                    @db.VarChar
+  id                    String                  @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
+  community             String                  @db.VarChar
   LeaderboardSubmission LeaderboardSubmission[]
 }
 
 model LeaderboardSubmission {
   id                        String                      @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
-  user                      String?                     @db.VarChar
-  community                 String?                     @db.VarChar
+  user                      String                      @db.VarChar
+  community                 String                      @db.VarChar
   entryUrl                  String?                     @db.VarChar
   verifiedBy                String?                     @db.VarChar
-  weight                    Int?                    
+  weight                    Int?
   type                      Int?
   verifiedAt                DateTime?                   @default(now())
   rank                      Int?
-  LeaderboardSubmissionType LeaderboardSubmissionType[]
-  Leaderboard               Leaderboard?                @relation(fields: [leaderboardId], references: [id])
   leaderboardId             String?                     @db.VarChar
+  Leaderboard               Leaderboard?                @relation(fields: [leaderboardId], references: [id])
+  LeaderboardSubmissionType LeaderboardSubmissionType[]
 }
 
 model LeaderboardSubmissionType {
-  id                      Int                     @id @default(autoincrement())
-  type                    String?                  @db.VarChar
-  LeaderboardSubmission   LeaderboardSubmission?   @relation(fields: [leaderboardSubmissionId], references: [id])
-  leaderboardSubmissionId String?                  @db.VarChar
+  id                      Int                    @id @default(autoincrement())
+  type                    String?                @db.VarChar
+  leaderboardSubmissionId String?                @db.VarChar
+  LeaderboardSubmission   LeaderboardSubmission? @relation(fields: [leaderboardSubmissionId], references: [id])
 }
 
 model PendingPostStatus {
-  id          Int         @id @default(autoincrement())
-  status      String?     @db.VarChar
-  PendingPost PendingPost[]
+  id          Int           @id @default(autoincrement())
+  status      String?       @db.VarChar
+  PendingPost PendingPost[] @relation("PendingPostToPendingPostStatus")
 }
 
 model LogLevel {
@@ -233,26 +256,32 @@ model LogType {
 }
 
 model SuspiciousLogin {
-  id                 String  @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
-  user               String? @db.VarChar
-  ip                 String? @db.VarChar
-  country            String? @db.VarChar
-  city               String? @db.VarChar
-  os                 String? @db.VarChar
-  device             String? @db.VarChar
-  deviceType         String? @db.VarChar
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
+  ip                 String?   @db.VarChar
+  country            String?   @db.VarChar
+  city               String?   @db.VarChar
+  os                 String?   @db.VarChar
+  device             String?   @db.VarChar
+  deviceType         String?   @db.VarChar
   isTrusted          Boolean?
   unverifiedAttempts Int?
   isBlocked          Boolean?
+  browser            String?   @db.VarChar
+  email              String?   @db.VarChar
+  platform           String?   @db.VarChar
+  createdAt          DateTime? @default(now()) @db.Timestamp(6)
+  userId             String?   @db.VarChar
 }
 
 model CommunityUser {
-  id         String     @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
-  community  String     @db.VarChar
-  user       String     @db.VarChar
-  role       Int        
-  verifiedAt DateTime?  @default(now())
-  Community  Community  @relation(fields: [community], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  UserRoles  UserRoles  @relation(fields: [role], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  User       User       @relation(fields: [user], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
+  community  String    @db.VarChar
+  user       String    @db.VarChar
+  role       Int
+  verifiedAt DateTime? @default(now())
+  Community  Community @relation(fields: [community], references: [id], onDelete: Cascade)
+  UserRoles  UserRoles @relation(fields: [role], references: [id], onDelete: Cascade)
+  User       User      @relation(fields: [user], references: [id], onDelete: Cascade)
+
+  @@unique([user, community])
 }

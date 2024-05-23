@@ -2,11 +2,11 @@
 import { z } from 'zod';
 // Schema for Relationship
 const RelationshipSchema = z.object({
-  id: z.number().int(),
+  id: z.string(),
   follower: z.string(),
   following: z.string(),
 });
 
-export { RelationshipSchema };
+export default RelationshipSchema;
 
 type Relationship = z.infer<typeof RelationshipSchema>;

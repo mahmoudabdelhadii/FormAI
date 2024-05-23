@@ -1,24 +1,23 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
 
-const fs = require("fs");
-const path = require("path");
-const { promisify } = require("util");
 
 import { z } from 'zod';
 
 const PendingPostSchema = z.object({
-  id: z.number().int(),
-  Content: z.string().optional(),
+  id: z.string().uuid().optional(),
+  content: z.string().optional(),
   fileUrl: z.string(),
-  community: z.number().int(),
-  user: z.string(),
+  community: z.string().uuid(),
+  user: z.string().uuid(),
   caption: z.string().optional(),
-  status: z.number().int().optional(),
+  status: z.string().optional(),
   confirmationToken: z.string().optional(),
 });
 
-
-export { PendingPostSchema };
+export default PendingPostSchema;
 
 type PendingPost = z.infer<typeof PendingPostSchema>;
+
+
+
+
+

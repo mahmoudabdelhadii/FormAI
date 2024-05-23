@@ -1,26 +1,49 @@
 import {lookup } from "geoip-lite";
-const getCurrentContextData = (req:any) => {
-  const ip = req.clientIp || "unknown";
-  const location = lookup(ip);
-  const country = location?.country ? location.country.toString() : "unknown";
-  const city = location?.city ? location.city.toString() : "unknown";
-  const os = req.useragent?.os ? req.useragent.os.toString() : "unknown";
-  const device = req.useragent?.device
-    ? req.useragent.device.toString()
-    : "unknown";
+import { Request } from 'express';
+interface ContextData {
+  ip: string;
+  country: string;
+  city: string;
+  os: string;
+  platform: string
+  device: string;
+  deviceType: string;
+}
+const getIpFromHeaders = (req: Request): string => {
+  const forwardedFor = req.headers['x-forwarded-for'];
+  if (Array.isArray(forwardedFor)) {
+    return forwardedFor[0];
+  } else if (typeof forwardedFor === 'string') {
+    return forwardedFor.split(',')[0].trim();
+  } 
+  return 'unknown';
+};
+const getCurrentContextData = (req: Request): ContextData => {
+  const ip = getIpFromHeaders(req) || req.clientIp || (req.useragent?.geoIp ? req.useragent.geoIp.ip : 'unknown')|| 'unknown';
+  const location = lookup(ip) || { country: 'unknown', city: 'unknown' };
+  const country = location.country || 'unknown';
+  const city = location.city || 'unknown';
+  const platform = req.useragent?.platform || 'unknown';
+  const os = req.useragent?.os || 'unknown';
+  const device = req.useragent?.source || 'unknown';
 
-  const isMobile = req.useragent?.isMobile || false;
-  const isDesktop = req.useragent?.isDesktop || false;
-  const isTablet = req.useragent?.isTablet || false;
+  const deviceType = req.useragent?.isMobile
+    ? 'Mobile'
+    : req.useragent?.isDesktop
+    ? 'Desktop'
+    : req.useragent?.isTablet
+    ? 'Tablet'
+    : 'unknown';
 
-  const deviceType = isMobile
-    ? "Mobile"
-    : isDesktop
-    ? "Desktop"
-    : isTablet
-    ? "Tablet"
-    : "unknown";
-  return { ip, country, city, os, device, deviceType };
+  return {
+    ip: ip.toString(),
+    country,
+    city,
+    platform,
+    os,
+    device,
+    deviceType,
+  };
 };
 
 export default getCurrentContextData;

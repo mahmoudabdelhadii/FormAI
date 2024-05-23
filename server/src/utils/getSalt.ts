@@ -1,6 +1,5 @@
 
 import prisma from "./prisma";
-import { User, Token } from '@prisma/client';
 
 async function getSalt(username: string) {
   const user = await prisma.user.findUnique({
