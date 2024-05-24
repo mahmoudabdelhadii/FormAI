@@ -1,9 +1,6 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
+
 import { z } from 'zod';
-const fs = require("fs");
-const path = require("path");
-const { promisify } = require("util");
+
 
 // Schema for PendingPost
 

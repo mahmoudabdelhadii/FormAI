@@ -31,11 +31,11 @@ export const saveLogInfo = async (req: Request | null, message: string, type: nu
 
     await prisma.log.create({
       data: {
-        user: req ? req.body.email : null,
-        context,
+        userId: req ? req.body.email : null,
+        contextId:context,
         message,
-        type: logType?.id,
-        level: logLevel?.id,
+        typeId: logType?.id,
+        levelId: logLevel?.id,
       },
     });
   } catch (error) {

@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+
 const { encryptField, decryptField } = require("../utils/encryption");
 import { z } from 'zod';
 // Schema for Context

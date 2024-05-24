@@ -23,7 +23,7 @@ passport.use(
 
       if (user) {
         const refreshTokenFromDB = await prisma.token.findUnique({
-          where: { user: user.id },
+          where: { userId: user.id },
         });
 
         if (!refreshTokenFromDB) {

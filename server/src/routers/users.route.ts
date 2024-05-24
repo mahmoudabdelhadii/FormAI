@@ -14,13 +14,13 @@ addUser
   
 } from '../controllers/user.controller';
 
-// import {
-//   getPublicUsers,
-//   followUser,
-//   getPublicUser,
-//   unfollowUser,
-//   getFollowingUsers,
-// } from '../controllers/profile.controller.js';
+import {
+  getPublicUsers,
+  followUser,
+  getPublicUser,
+  unfollowUser,
+  getFollowingUsers,
+} from '../controllers/profile.controller';
 
 // import {
 //   addUserValidator,
@@ -37,24 +37,24 @@ import {
 } from '../middleware/limiter/limiter';
 
 import decodeToken from '../middleware/auth/decodeToken';
-
+import { userValidator } from '../middleware/validators/validator';
 const router = Router();
+const requireAuth = passport.authenticate('jwt', { session: false });
 // const requireAuth = passport.authenticate('jwt', { session: false });
 
-// router.get('/public-users/:id', decodeToken, getPublicUser);
-// router.get('/public-users', decodeToken, getPublicUsers);
-// router.get('/moderator', decodeToken, getModProfile);
-// router.get('/following', decodeToken, getFollowingUsers);
-router.get('/:id', getUser);
+router.get("/public-users/:id", requireAuth, decodeToken, getPublicUser);
+router.get("/public-users", requireAuth, decodeToken, getPublicUsers);
+router.get("/following", requireAuth, decodeToken, getFollowingUsers);
+router.get("/:id", requireAuth, getUser);
 
 router.post(
   '/signup',
-//   signUpSignInLimiter,
+  signUpSignInLimiter,
 //   avatarUpload,
-//   addUserValidator,
+userValidator,
 //   addUserValidatorHandler,
   addUser,
-//   sendVerificationEmail
+  sendVerificationEmail
 );
 
 router.post('/refresh-token', refreshToken);
@@ -70,10 +70,10 @@ router.post(
 
 router.post('/logout', logout);
 
-router.put('/:id', decodeToken, updateInfo);
+router.put('/:id', requireAuth,decodeToken, updateInfo);
 
-// router.use(followLimiter);
-// router.patch('/:id/follow', decodeToken, followUser);
-// router.patch('/:id/unfollow', decodeToken, unfollowUser);
+router.use(followLimiter);
+router.patch('/:id/follow', decodeToken, followUser);
+router.patch('/:id/unfollow', decodeToken, unfollowUser);
 
 export default router;

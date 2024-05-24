@@ -10,8 +10,13 @@ import bodyParser from 'body-parser';
 import { useragentMiddleware } from './middleware/userAgent';
 import contextAuthRoutes from './routers/context-Data.route';
 import { saveLogInfo } from './middleware/logger';
-import passport from "passport";
+import passport from "./config/Passport";
 import { search } from "./controllers/search.controller";
+import awsRouter from "./routers/auth.route"
+
+
+
+
 const port = process.env.NODE_PORT || 8080
 
 // app
@@ -25,6 +30,9 @@ app.use(express.json());
 app.use(requestIp.mw());
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: false }));
+app.use('/static', express.static(path.join(__dirname, '../public')))
+
+console.log(path.join(__dirname, '../public'))
 app.use(cookieParser());
 app.use(passport.initialize());
 app.get("/health", (req, res) => {
@@ -36,7 +44,7 @@ app.get("/search", search)
 app.use("/community", communityRouter);
 app.use('/auth', contextAuthRoutes);
 app.use('/user', usersRouter);
-
+app.use("/aws", awsRouter)
 app.listen(port, () => console.log(`Server listening at http://localhost:${port}`))
 
 export default app;

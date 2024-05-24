@@ -2,7 +2,7 @@ import { z } from 'zod';
 // Schema for Context
 const SuspiciousLoginSchema = z.object({
   id: z.string(),
-  user: z.string().optional(),
+  userId: z.string().optional(),
   email: z.string().optional(),
   ip: z.string().optional(),
   country: z.string().optional(),

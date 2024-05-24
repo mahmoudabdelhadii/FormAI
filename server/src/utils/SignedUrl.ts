@@ -13,7 +13,7 @@ dotenv.config();
  * @param {number} [expireTime=3600] - The expiration time for the URL in seconds.
  * @returns {string} - The signed URL.
  */
-const generateSignedUrl = (objectPath: string, expireTime: number = 3600): string => {
+const generateSignedUrl = async(objectPath: string, expireTime: number = 3600): Promise<string> => {
   const domain = process.env.CLOUDFRONT_DOMAIN; // Hard-coded CloudFront domain
   const keyPairId = process.env.CLOUDFRONT_KEY_PAIR_ID; // Key pair ID from environment variable
   const privateKeyPath = process.env.CLOUDFRONT_PRIVATE_KEY_PATH; // Path to the private key file from environment variable

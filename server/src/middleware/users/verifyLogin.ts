@@ -53,7 +53,7 @@ export const sendLoginVerificationEmail = async (req: Request, res: Response) =>
         email,
         verificationCode: id,
         messageId: info.messageId,
-        for: 1,
+        forId: 2,
       },
     });
 

@@ -7,8 +7,8 @@ import { z } from 'zod';
 const CommentSchema = z.object({
   id: z.string().uuid().optional(),
   body: z.string().trim().max(1000, "Comment body must be no more than 1000 characters long").optional(),
-  user: z.string().uuid(),
-  post: z.string().uuid(),
+  userId: z.string().uuid(),
+  postId: z.string().uuid(),
 });
 
 export default CommentSchema;

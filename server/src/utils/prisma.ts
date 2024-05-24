@@ -1,5 +1,5 @@
 import { PrismaClient,Prisma } from '../generated/client'
-import UserSchema from '../models/user.model';
+import {UserSchema} from '../models/user.model';
 import CommentSchema from '../models/comment.model';
 import AdminSchema from '../models/admin.model';
 import RelationshipSchema from '../models/relationship.model';

@@ -11,9 +11,9 @@ const CommunitySchema = z.object({
 
 const CommunityUserSchema = z.object({
   id: z.string().uuid().optional(),
-  community: z.string().uuid(),
-  user: z.string().uuid(),
-  role: z.number().int(),
+  communityId: z.string().uuid(),
+  userId: z.string().uuid(),
+  roleId: z.number().int(),
   verifiedAt: z.date().optional(),
 });
 
@@ -23,8 +23,8 @@ type CommunityUser = z.infer<typeof CommunityUserSchema>;
 // Schema for CommunityRequest
 const CommunityRequestSchema = z.object({
   id: z.string().uuid().optional(),
-  user: z.string().uuid().optional(),
-  community: z.string().uuid().optional(),
+  userId: z.string().uuid().optional(),
+  communityId: z.string().uuid().optional(),
   requestedAt: z.date().optional(),
   message: z.string().optional(),
 });

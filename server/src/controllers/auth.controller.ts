@@ -96,7 +96,7 @@ export const getUserPreferences = async (req: Request, res: Response): Promise<a
     }
 
     const userPreferences = await prisma.preferences.findUnique({
-      where: { user:userId },
+      where: { userId:userId },
     });
 
     if (!userPreferences) {

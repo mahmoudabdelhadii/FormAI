@@ -70,7 +70,7 @@ export const signin = async (req: CustomRequest, res: Response, next: NextFuncti
     }
 
     const userPreference = await prisma.preferences.findUnique({
-      where: { user: existingUser.id },
+      where: { userId: existingUser.id },
     });
 
     if (userPreference?.enableContextBasedAuth) {
@@ -133,19 +133,32 @@ export const signin = async (req: CustomRequest, res: Response, next: NextFuncti
 
     const payload = { id: existingUser.id, email: existingUser.email };
     const accessToken = sign(payload, process.env.SECRET as string, { expiresIn: '6h' });
-    const refreshToken = sign(payload, process.env.REFRESH_SECRET as string, { expiresIn: '7d' });
+    const refreshToken = sign(payload, process.env.REFRESH_SECRET as string, { expiresIn: '14d' });
 
-    
-   
-
-    await prisma.token.create({
-      data: {
-        user: existingUser.id,
-        refreshToken,
-        accessToken,
-      },
+    const existingToken = await prisma.token.findUnique({
+      where: { userId: existingUser.id },
     });
+    console.log("existingUser",existingUser)
+    console.log("existingToken",existingToken)
 
+    if (existingToken) {
+      await prisma.token.update({
+        where: { id: existingToken.id },
+        data: {
+          accessToken,
+          refreshToken,
+        },
+      });
+    } else {
+      await prisma.token.create({
+        data: {
+          userId: existingUser.id,
+          refreshToken,
+          accessToken,
+        },
+      });
+    }
+    console.log("done")
     res.status(200).json({
       accessToken,
       refreshToken,
@@ -159,6 +172,7 @@ export const signin = async (req: CustomRequest, res: Response, next: NextFuncti
     });
   } catch (err: any) {
     await saveLogInfo(req, MESSAGE.SIGN_IN_ERROR + err.message, LOG_TYPE.SIGN_IN, LEVEL.ERROR);
+    console.error(err)
     res.status(500).json({ message: 'Something went wrong' });
   }
 };
@@ -190,46 +204,53 @@ export const refreshToken = async (req: Request, res: Response): Promise<any> =>
     }
 
     const existingUser = await prisma.user.findUnique({
-      where: { id: existingToken.user },
+      where: { id: existingToken.userId },
     });
 
     if (!existingUser) {
       return res.status(401).json({ message: 'Invalid refresh token' });
     }
-    let tokenExpiry=null;
+    let tokenExpiry = null;
 
-  
-    const decoded = decode(existingToken.refreshToken)
+    const decoded = decode(existingToken.refreshToken);
 
     if (decoded && typeof decoded !== 'string') {
-      // decoded is of type JwtPayload
       tokenExpiry = decoded.exp;
       if (tokenExpiry) {
-          console.log("Token expiration time:", tokenExpiry);
+        console.log("Token expiration time:", tokenExpiry);
       } else {
-          console.error("Expiration time not found in the token payload.");
+        console.error("Expiration time not found in the token payload.");
       }
     }
-  
-    const refreshTokenExpiresAt = (tokenExpiry??0) * 1000;
+
+    const refreshTokenExpiresAt = (tokenExpiry ?? 0) * 1000;
     if (Date.now() >= refreshTokenExpiresAt) {
       await prisma.token.delete({ where: { id: existingToken.id } });
       return res.status(401).json({ message: 'Expired refresh token' });
     }
 
     const payload = { id: existingUser.id, email: existingUser.email };
-    const accessToken = sign(payload, process.env.SECRET as string, { expiresIn: '6h' });
+    const newAccessToken = sign(payload, process.env.SECRET as string, { expiresIn: '6h' });
+    const newRefreshToken = sign(payload, process.env.REFRESH_SECRET as string, { expiresIn: '7d' });
+
+    await prisma.token.update({
+      where: { id: existingToken.id },
+      data: {
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      },
+    });
 
     res.status(200).json({
-      accessToken,
-      refreshToken: existingToken.refreshToken,
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
       accessTokenUpdatedAt: new Date().toLocaleString(),
     });
-  } 
-  catch (err) {
+  } catch (err) {
+    console.error(err)
     res.status(500).json({ message: 'Internal server error' });
   }
-}
+};
 
 
 export const getUser = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
@@ -257,15 +278,15 @@ export const getUser = async (req: Request, res: Response, next: NextFunction): 
     if(!user){
       return res.status(500).json({ message: 'User not found' });
     }
-    const totalPosts = await prisma.post.count({ where: { user: user.id } });
+    const totalPosts = await prisma.post.count({ where: { userId: user.id } });
     const communities = await prisma.communityUser.findMany({
-      where: { user: user.id },
+      where: { userId: user.id },
     });
     const totalCommunities = communities.length;
 
     const postCommunities = await prisma.post.findMany({
-      where: { user: user.id },
-      distinct: ['community'],
+      where: { userId: user.id },
+      distinct: ['communityId'],
     });
     const totalPostCommunities = postCommunities.length;
 
@@ -288,8 +309,8 @@ export const getUser = async (req: Request, res: Response, next: NextFunction): 
       duration = `${durationYears} years`;
     }
     const posts = await prisma.post.findMany({
-      where: { user: user.id },
-      include: { Like:true, Comment:true },
+      where: { userId: user.id },
+      include: { Likes:true, Comments:true },
       take: 20,
       orderBy: { createdAt: 'desc' },
     });
@@ -303,13 +324,12 @@ export const getUser = async (req: Request, res: Response, next: NextFunction): 
 };
 
 export const addUser = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
-  const { username,firstName,lastName, email, password, isConsentGiven, avatarUrl } = req.body;
+  const { username,firstName,lastName, email, password, isConsentGiven } = req.body;
   try {
     
-    console.log(req)
     // Hash the password
     const hashedPassword = await hashPassword(password);
-    console.log(hashPassword)
+
     // Determine the user role based on the email domain
     const emailDomain = email.split('@')[1];
     const role = emailDomain === 'mod.formai.com' ? 'moderator' : 'general';
@@ -322,17 +342,16 @@ export const addUser = async (req: Request, res: Response, next: NextFunction): 
         lastName,
         email,
         password: hashedPassword,
-        avatarUrl: avatarUrl || 'https://raw.githubusercontent.com/nz-m/public-files/main/dp.jpg', // Default avatar if not provided
         createdAt: new Date(), 
       },
     });
 
     if (!newUser) {
-      throw new Error('Failed to add user 1');
+      throw new Error('Failed to add user');
     }
-
+    console.log("here")
     // If consent is not given, return a success message
-    if (isConsentGiven === 'false') {
+    if (isConsentGiven === false) {
       res.status(201).json({ message: 'User added successfully' });
     } else {
       // Otherwise, proceed with additional processing (e.g., sending a welcome email)
@@ -340,7 +359,7 @@ export const addUser = async (req: Request, res: Response, next: NextFunction): 
       next();
     }
   } catch (err:any) {
-    res.status(400).json({ message: 'Failed to add user 2', error: err.message });
+    res.status(400).json({ message: 'Failed to add user', error: err.message });
   }
 };
 
@@ -373,7 +392,7 @@ export const updateInfo = async (req: Request, res: Response, next: NextFunction
         data: updateData,
       });
 
-      return res.status(200).json({ message: 'Personal details updated successfully', user: updatedUser });
+      return res.status(200).json({ message: 'Personal details updated successfully', userId: updatedUser });
     }
 
     // If no fields are provided for update, return a message

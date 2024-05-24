@@ -1,171 +1,312 @@
+import { Request, Response } from 'express';
+import prisma from '../utils/prisma';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+dayjs.extend(relativeTime);
 
-import type { Request, Response } from 'express';
-import prisma from "../utils/prisma"
-import { equal } from 'assert';
-import generateSignedUrl from '../utils/SignedUrl';
+export const getCommunities = async (req: Request, res: Response) => {
+  try {
+    const communities = await prisma.community.findMany();
+    res.status(200).json(communities);
+  } catch (error) {
+    res.status(404).json({ message: "No communities found" });
+  }
+};
 
-const getCommunities = async (req:Request, res:Response) => {
-    try {
-      const communities = await prisma.community.findMany()
-      res.status(200).json(communities);
-    } catch (error) {
-      res.status(500).json({ message: "Error retrieving communities" });
+export const getCommunity = async (req: Request, res: Response) => {
+  try {
+    const community = await prisma.community.findUnique({
+      where: { id: req.params.id },
+      include: { CommunityRequests: true, CommunityUsers: true, BannedUsers: true },
+    });
+    res.status(200).json(community);
+  } catch (error) {
+    res.status(404).json({ message: "Community not found" });
+  }
+};
+
+export const createCommunity = async (req: Request, res: Response) => {
+  try {
+    const communities = req.body;
+    const savedCommunities = await prisma.community.createMany({ data: communities });
+    res.status(201).json(savedCommunities);
+  } catch (error) {
+    res.status(409).json({ message: "Error creating community" });
+  }
+};
+
+export const getMemberCommunities = async (req: Request, res: Response) => {
+  try {
+    const communities = await prisma.community.findMany({
+      where: { CommunityUsers: { some: { userId: req.params.userId } } },
+      select: {
+        id: true,
+        name: true,
+        CommunityUsers: { select: { id: true } },
+        description: true,
+      },
+    });
+    res.status(200).json(communities);
+  } catch (error) {
+    res.status(500).json({ message: "Error getting communities" });
+  }
+};
+
+export const getNotMemberCommunities = async (req: Request, res: Response) => {
+  try {
+    const communities = await prisma.community.findMany({
+      where: {
+        NOT: {
+          CommunityUsers: { some: { userId: req.params.userId } },
+        },
+        BannedUsers: { none: { userId: req.params.userId } },
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        CommunityUsers: { select: { id: true } },
+      },
+      orderBy: { CommunityUsers: { _count: 'desc' } },
+      take: 10,
+    });
+    res.status(200).json(communities);
+  } catch (error) {
+    res.status(500).json({ message: "Error getting communities" });
+  }
+};
+
+export const joinCommunity = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const community = await prisma.community.update({
+      where: { id },
+      data: {
+        CommunityRequests: { create: { userId: req.params.userId, requestedAt: new Date() } },
+      },
+    });
+
+    res.status(200).json(community);
+  } catch (error) {
+    res.status(500).json({ message: "Error joining community" });
+  }
+};
+
+export const approveRequest = async (req: Request, res: Response) => {
+  try {
+    const { requestId } = req.params;
+
+    const request = await prisma.communityRequest.findUnique({
+      where: { id: requestId },
+      include: { Community: true },
+    });
+
+    if (!request) {
+      return res.status(404).json({ message: "Request not found" });
     }
-  };
-  
-  const getCommunity = async (req:Request, res:Response) => {
-    try {
-      const { communityId } = req.params;
-      const community = await prisma.community.findFirst({
-        relationLoadStrategy: 'join', 
-        where: {
-          id: communityId,
-          
-        },
-        include: {
-          CommunityRequest: {
-            select:{
-              id: true,
-            user: true,
-            requestedAt: true,
-            message: true 
-            }
-          },
-          CommunityUser:{
-            select:{
-              user:true,
-              verifiedAt: true,
-              UserRoles:{
-                select: {
-                    role:true
-                }
-              },
-            }
-          },
-          BannedUsers:true,
-    
-        },
-        
-      })
-      if (!community) {
-        return res.status(404).json({ message: "Community not found" });
+
+    const community = await prisma.community.update({
+      where: { id: request.communityId },
+      data: {
+        CommunityUsers: { create: { userId: request.userId, roleId: 3 } },
+        CommunityRequests: { delete: { id: requestId } },
+      },
+    });
+
+    res.status(200).json(community);
+  } catch (error) {
+    res.status(500).json({ message: "Error approving request" });
+  }
+};
+
+export const leaveCommunity = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const community = await prisma.community.update({
+      where: { id },
+      data: {
+        CommunityUsers: { deleteMany: { userId: req.params.userId } },
+      },
+    });
+    res.status(200).json(community);
+  } catch (error) {
+    res.status(500).json({ message: "Error leaving community" });
+  }
+};
+
+export const banUser = async (req: Request, res: Response) => {
+  try {
+    const { userId, communityId } = req.params;
+
+    const community = await prisma.community.update({
+      where: { id: communityId },
+      data: {
+        CommunityUsers: { deleteMany: { userId } },
+        BannedUsers: { create: { userId, reason: "Violation of rules" } },
+      },
+    });
+
+    res.status(200).json(community);
+  } catch (error) {
+    res.status(500).json({ message: "Error banning user from community" });
+  }
+};
+
+export const unbanUser = async (req: Request, res: Response) => {
+  try {
+    const { userId, communityId } = req.params;
+    const community = await prisma.community.update({
+      where: { id: communityId },
+      data: {
+        BannedUsers: { deleteMany: { userId } },
+      },
+    });
+    res.status(200).json(community);
+  } catch (error) {
+    res.status(500).json({ message: "Error unbanning user from community" });
+  }
+};
+
+export const reportPost = async (req: Request, res: Response) => {
+  try {
+    const { postId, reportReason, communityId } = req.body.info;
+
+    if (!postId || !reportReason) {
+      return res.status(400).json({ message: "Invalid data. postId and reportReason are required." });
+    }
+
+    const reportedPost = await prisma.report.findFirst({ where: { postId } });
+
+    if (reportedPost) {
+      if (reportedPost.reportedBy.includes(req.params.userId)) {
+        return res.status(400).json({ message: "You have already reported this post." });
       }
 
-      
-       const moderatorCount = community.CommunityUser
-      // const memberCount = community.members.length;
-      // const formattedCommunity = {
-      //   ...community,
-      //   memberCount,
-      //   moderatorCount,
-      // };
-      res.status(200).json(community);
-    } catch (error) {
-      res.status(500).json({ message: "Error retrieving community" });
-    }
-  };
-  
-  const getModerators = async (req:Request, res:Response) => {
-    
-    try {
-      const { communityId } = req.params;
-      const moderators = await prisma.communityUser.findMany({
-        where: {
-          community: communityId, 
-          role: 2
-        },
-        include:{
-          UserRoles: {
-            select: {
-              role: true,
-            },
-          }
-        }
-
-      })
-      res.status(200).json(moderators);
-    } catch (error) {
-      res.status(500).json({ message: "Error retrieving moderators" });
-    }
-  };
-  const addModerator = async (req:Request, res:Response) => {
-    try {
-      const { communityId, moderatorId } = req.query;
-
-      if (!communityId){
-        return res.status(404).json({ message: "no community id provided" });
-      }
-      const community = await prisma.communityUser.findMany({
-        where:{
-          community: communityId.toString(),
-          role: 2
-        },
-        select:{
-          user:true
-        }
+      await prisma.report.update({
+        where: { id: reportedPost.id },
+        data: { reportedBy: req.params.userId  },
       });
-      if (!community) {
-        return res.status(404).json({ message: "Community not found" });
-      }
-      const existingModerator = community
 
-      console.log(existingModerator)
-      if (existingModerator) {
-        return res.status(400).json(community);
-      }
-      // community.moderators.push(moderatorId);
-      // community.members.push(moderatorId);
-      // await community.save();
-      res.status(200).json({ message: "Moderator added!" });
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ message: "Error adding moderator" });
+      return res.status(200).json(reportedPost);
     }
-  };
-  
 
-  const getSignedUrl = async (req:Request, res:Response) => {
-    try {
-      const { url } = req.body;
-     
-      if (!url) {
-        return res.status(400).json({ message: 'Object path (url) is required' });
-      }
-      const data = generateSignedUrl(url)
-     
-      res.status(200).json({ message: data });
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ message: "Error signing url" });
+    const report = await prisma.report.create({
+      data: {
+        postId,
+        communityId,
+        reportedBy: req.params.userId,
+        reportReason,
+        reportDate: new Date(),
+      },
+    });
+
+    res.status(200).json({ message: "Post reported successfully." });
+  } catch (error) {
+    res.status(500).json({ message: "Error reporting post" });
+  }
+};
+
+export const getReportedPosts = async (req: Request, res: Response) => {
+  try {
+    const communityId = req.params.id;
+    const community = await prisma.community.findUnique({
+      where: { id: communityId },
+      select: { id: true },
+    });
+
+    if (!community) {
+      return res.status(404).json({ message: "Community not found" });
     }
-  };
 
-  // const removeModerator = async (req:Request, res:Response) => {
-  //   try {
-  //     const { communityId, moderatorId } = req.query;
-  
-  //     const community = await prisma.community.findById(communityId);
-  //     if (!community) {
-  //       return res.status(404).json({ message: "Community not found" });
-  //     }
-  //     const existingModerator = community.moderators.find(
-  //       (mod) => mod.toString() === moderatorId
-  //     );
-  //     if (!existingModerator) {
-  //       return res.status(400).json({ message: "Not a moderator" });
-  //     }
-  //     community.moderators = community.moderators.filter(
-  //       (mod) => mod.toString() !== moderatorId
-  //     );
-  //     community.members = community.members.filter(
-  //       (mod) => mod.toString() !== moderatorId
-  //     );
-  
-  //     await community.save();
-  //     res.status(200).json({ message: "Moderator removed" });
-  //   } catch (error) {
-  //     res.status(500).json({ message: "Error removing moderator" });
-  //   }
-  // };
+    const reportedPosts = await prisma.report.findMany({
+      where: { communityId: community.id },
+      include: {
+        Post: {
+          select: { id: true, content: true, fileUrl: true, createdAt: true, userId: true },
+        },
+        User: {
+          select: { id: true, firstName: true, lastName: true, avatarUrl: true },
+        },
+      },
+      orderBy: { reportDate: 'desc' },
+    });
 
-  export {getSignedUrl,getCommunities,getCommunity,getModerators,addModerator}
+    const formattedReportedPosts = reportedPosts.map(post => ({
+      ...post,
+      reportDate: dayjs(post.reportDate).fromNow(),
+    }));
+
+    res.status(200).json({ formattedReportedPosts });
+  } catch (error) {
+    res.status(500).json({ message: "An error occurred while retrieving the reported posts" });
+  }
+};
+
+export const removeReportedPost = async (req: Request, res: Response) => {
+  try {
+    const postId = req.params.postId;
+
+    await prisma.report.deleteMany({
+      where: { postId },
+    });
+
+    res.status(200).json({ message: "Reported post removed successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+export const getCommunityMembers = async (req: Request, res: Response) => {
+  try {
+    const communityId = req.params.id;
+    const community = await prisma.community.findUnique({
+      where: { id: communityId },
+      include: {
+        CommunityUsers: {
+          where: { roleId: 3 },
+          select: { User: { select: { id: true, firstName: true, lastName: true, avatarUrl: true, createdAt: true } } },
+        },
+        BannedUsers: {
+          select: { User: { select: { id: true, firstName: true, lastName: true, avatarUrl: true, createdAt: true} } },
+        },
+      },
+    });
+
+    if (!community) {
+      return res.status(404).json({ message: "Community not found" });
+    }
+
+    const members = community.CommunityUsers.map(cu => cu.User);
+    const bannedUsers = community.BannedUsers.map(bu => bu.User);
+
+    res.status(200).json({ members, bannedUsers });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getCommunityMods = async (req: Request, res: Response) => {
+  try {
+    const communityId = req.params.id;
+    const community = await prisma.community.findUnique({
+      where: { id: communityId },
+      include: {
+        CommunityUsers: {
+          where: { roleId: 2 },
+          select: { User: { select: { id: true, firstName: true, lastName: true, avatarUrl: true, createdAt: true } } },
+        },
+      },
+    });
+
+    if (!community) {
+      return res.status(404).json({ message: "Community not found" });
+    }
+
+    const moderators = community.CommunityUsers.map(cu => cu.User);
+
+    res.status(200).json(moderators);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};

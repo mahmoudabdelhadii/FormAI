@@ -22,7 +22,7 @@ export const verifyEmailValidation = [
 export const sendVerificationEmail = async (req: Request, res: Response) => {
   const USER = process.env.EMAIL as string;
   const PASS = process.env.PASSWORD as string;
-  const { email, name } = req.body;
+  const { email, firstName } = req.body;
 
   const verificationCode = Math.floor(10000 + Math.random() * 90000).toString();
   const verificationLink = `${CLIENT_URL}/auth/verify?code=${verificationCode}&email=${email}`;
@@ -37,10 +37,10 @@ export const sendVerificationEmail = async (req: Request, res: Response) => {
     });
 
     const info = await transporter.sendMail({
-      from: `"SocialEcho" <${USER}>`,
+      from: `"FormAI" <${USER}>`,
       to: email,
-      subject: 'Verify your email address',
-      html: verifyEmailHTML(name, verificationLink, verificationCode),
+      subject: 'FormAI: Verify your email address',
+      html: verifyEmailHTML(firstName, verificationLink, verificationCode),
     });
 
     await prisma.email.create({
@@ -48,7 +48,7 @@ export const sendVerificationEmail = async (req: Request, res: Response) => {
         email,
         verificationCode,
         messageId: info.messageId,
-        for: 2,
+        forId: 1,
       },
     });
 
@@ -92,7 +92,7 @@ export const verifyEmail = async (req: Request, res: Response, next: NextFunctio
       prisma.email.deleteMany({ where: { email } }),
       prisma.preferences.create({
         data: {
-          user: updatedUser.id,
+          userId: updatedUser.id,
           enableContextBasedAuth: true,
         },
       }),
