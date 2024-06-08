@@ -1,5 +1,5 @@
 # Use a specific version of node alpine for the development environment
-FROM node:21-alpine as development
+FROM node:alpine as development
 
 # Set the working directory in the container
 WORKDIR /usr/src/server
@@ -57,7 +57,7 @@ RUN npx prisma generate
 RUN npm run build
 
 # Use the same node alpine version for the production environment
-FROM node:21-alpine as production
+FROM node:alpine as production
 
 # Set NODE_ENV to production
 ARG NODE_ENV=production
@@ -109,10 +109,12 @@ COPY --from=development /usr/src/server/dist ./dist
 COPY --from=development /usr/src/server/prisma ./prisma
 
 # Copy the generated Prisma client
+COPY --from=development /usr/src/server/node_modules/@prisma/client /usr/src/server/node_modules/@prisma/client
+COPY --from=development /usr/src/server/node_modules/.prisma /usr/src/server/node_modules/.prisma
 COPY --from=development /usr/src/server/src/generated/client /usr/src/server/src/generated/client
 
 # Copy the swagger.yml file
-COPY --from=development /usr/src/server/src/swagger.yml ./src/
+COPY --from=development /usr/src/server/src/swagger.yml ./
 
 # Expose the port the app runs on
 EXPOSE 8080

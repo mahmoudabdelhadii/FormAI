@@ -173,9 +173,16 @@ export const signin = async (req: CustomRequest, res: Response, next: NextFuncti
       accessTokenUpdatedAt: new Date().toISOString(),
       user: {
         id: existingUser.id,
-        name: `${existingUser.firstName} ${existingUser.lastName}`,
+        firstName: existingUser.firstName,
+        lastName: existingUser.lastName,
         email: existingUser.email,
         avatarUrl: existingUser.avatarUrl,
+        username: existingUser.username,
+        bio: existingUser.bio,
+        weight: existingUser.weight,
+        height: existingUser.height,
+        
+
       },
     });
   } catch (err: any) {
