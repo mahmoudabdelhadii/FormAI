@@ -24,6 +24,7 @@ describe('formatUserData', () => {
         height: 1.8,
         weight: 75,
         age: 30,
+        gender: 'male',
         CommunityUser: [
           {
             id: 'communityUser1',
@@ -92,6 +93,7 @@ describe('formatUserData', () => {
         height: null,
         weight: null,
         age: null,
+        gender: null,
         CommunityUser: [],
         Token: null,
       };
