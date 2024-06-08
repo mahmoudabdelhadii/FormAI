@@ -24,7 +24,7 @@ import postsRouter from "./routers/posts.route";
 import leaderboardRouter from "./routers/leaderboard.route"
 
 const port = process.env.NODE_PORT || 8080
-const swaggerDocument = YAML.load('./swagger.yml');
+const swaggerDocument = YAML.load('swagger.yml');
 // app
 const app: Application = express();
 
