@@ -51,7 +51,7 @@ COPY prisma ./prisma/
 COPY . .
 
 # Generate Prisma client
-RUN npm run prisma:gen
+RUN npx prisma generate
 
 # Build the project
 RUN npm run build
@@ -105,11 +105,14 @@ RUN npm ci --only=production
 # Copy the built distributable JavaScript from the development stage
 COPY --from=development /usr/src/server/dist ./dist
 
-# Copy the Prisma directory and binaries
+# Copy the Prisma directory
 COPY --from=development /usr/src/server/prisma ./prisma
 
-COPY --from=development /usr/src/server/node_modules/@prisma/client /usr/src/server/node_modules/@prisma/client
-COPY --from=development /usr/src/server/node_modules/.prisma /usr/src/server/node_modules/.prisma
+# Copy the generated Prisma client
+COPY --from=development /usr/src/server/src/generated/client /usr/src/server/src/generated/client
+
+# Copy the swagger.yml file
+COPY --from=development /usr/src/server/src/swagger.yml ./src/
 
 # Expose the port the app runs on
 EXPOSE 8080
