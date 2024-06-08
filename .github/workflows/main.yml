@@ -22,7 +22,7 @@ env:
   EMAIL_SERVICE: ${{ secrets.EMAIL_SERVICE }}
   CLOUDFRONT_DOMAIN: ${{ secrets.CLOUDFRONT_DOMAIN }}
   CLOUDFRONT_KEY_PAIR_ID: ${{ secrets.CLOUDFRONT_KEY_PAIR_ID }}
-  CLOUDFRONT_PRIVATE_KEY: ${{ secrets.CLOUDFRONT_PRIVATE_KEY }}
+  CLOUDFRONT_PRIVATE_KEY_BASE64: ${{ secrets.CLOUDFRONT_PRIVATE_KEY_BASE64 }}
 
 jobs:
   deploy-infra:
@@ -91,6 +91,8 @@ jobs:
           VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
           HCP_CLIENT_ID: ${{ secrets.HCP_CLIENT_ID }}
           HCP_CLIENT_SECRET: ${{ secrets.HCP_CLIENT_SECRET }}
+      - name: Prepare CloudFront Private Key
+        run: echo "$CLOUDFRONT_PRIVATE_KEY_BASE64" | base64 --decode > cloudfront_private_key.pem
       - name: Build, Push docker image
         env:
           REGISTRY: "${{ steps.login-ecr.outputs.registry }}"
@@ -105,7 +107,6 @@ jobs:
           EMAIL_SERVICE: ${{ secrets.EMAIL_SERVICE }}
           CLOUDFRONT_DOMAIN: ${{ secrets.CLOUDFRONT_DOMAIN }}
           CLOUDFRONT_KEY_PAIR_ID: ${{ secrets.CLOUDFRONT_KEY_PAIR_ID }}
-          CLOUDFRONT_PRIVATE_KEY: ${{ secrets.CLOUDFRONT_PRIVATE_KEY }}
         run: |-
           docker build \
           --build-arg DATABASE_URL=$DATABASE_URL \
@@ -117,7 +118,7 @@ jobs:
           --build-arg EMAIL_SERVICE=$EMAIL_SERVICE \
           --build-arg CLOUDFRONT_DOMAIN=$CLOUDFRONT_DOMAIN \
           --build-arg CLOUDFRONT_KEY_PAIR_ID=$CLOUDFRONT_KEY_PAIR_ID \
-          --build-arg CLOUDFRONT_PRIVATE_KEY=$CLOUDFRONT_PRIVATE_KEY \
+          --build-arg CLOUDFRONT_PRIVATE_KEY="$(cat cloudfront_private_key.pem)" \
           -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
         working-directory: ./server
