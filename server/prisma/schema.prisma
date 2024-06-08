@@ -194,6 +194,7 @@ model User {
   height          Float?
   weight          Float?
   age             Int?
+  gender          String?        @db.VarChar @default("")
   CommunityUser   CommunityUser[]
    BannedUsers      BannedUsers[]
    Reports         Report[]
@@ -206,7 +207,15 @@ model User {
   Likes            Like[]
   Submissions     LeaderboardSubmission[]
   Verifications   LeaderboardSubmission[] @relation("VerifiedBy")
+PasswordResets  PasswordReset[]
+}
 
+model PasswordReset {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar
+  userId             String   @db.VarChar
+  token              String   @unique @db.VarChar
+  tokenExpires       DateTime @db.Timestamp(6)
+  User               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model UserRoles {

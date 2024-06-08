@@ -1,8 +1,8 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import CameraScreen from "../Screens/CameraScreen";
-import MediaPreviewScreen from "../Screens/MediaPreviewScreen";
+import CameraScreen from "../Screens/Home/CameraScreen";
+import MediaPreviewScreen from "../Screens/Home/MediaPreviewScreen";
 
 export type MediaStackParamList = {
   Camera: undefined;

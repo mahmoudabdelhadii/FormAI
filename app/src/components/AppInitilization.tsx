@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { PreSplash, PostSplash } from "../Screens/SplashScreen";
+import {
+  PreSplash,
+  PostSplash,
+} from "../Screens/AppInitialization/SplashScreen";
 import { View, ActivityIndicator, StyleSheet, Text } from "react-native";
 
 interface AppInitializationProps {

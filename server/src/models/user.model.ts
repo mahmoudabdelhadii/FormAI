@@ -117,4 +117,7 @@ const UserSchema = z.object({
 
 export {idSchema, usernameSchema, passwordSchema, emailSchema, firstNameSchema, lastNameSchema,  UserSchema};
 
+export const createUserSchema = UserSchema; // For create, all fields are required except optional ones
+export const updateUserSchema = UserSchema.partial();
+
 type User = z.infer<typeof UserSchema>;

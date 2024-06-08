@@ -2,7 +2,16 @@ import { Request, Response } from 'express';
 import prisma from '../utils/prisma';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import { DecodedRequest } from '../types/interfaces';
 dayjs.extend(relativeTime);
+
+const isAdminOrModerator = async (userId: string, communityId: string) => {
+  const userRole = await prisma.communityUser.findUnique({
+    where: { userId_communityId: { userId, communityId } },
+    select: { roleId: true },
+  });
+  return userRole?.roleId === 1 || userRole?.roleId === 2;
+};
 
 export const getCommunities = async (req: Request, res: Response) => {
   try {
@@ -25,11 +34,24 @@ export const getCommunity = async (req: Request, res: Response) => {
   }
 };
 
-export const createCommunity = async (req: Request, res: Response) => {
+export const createCommunity = async (req: DecodedRequest, res: Response) => {
   try {
-    const communities = req.body;
-    const savedCommunities = await prisma.community.createMany({ data: communities });
-    res.status(201).json(savedCommunities);
+    const { name, description } = req.body;
+    const userId = req.userData!.userId;
+
+    const community = await prisma.community.create({
+      data: {
+        name,
+        description,
+        CommunityUsers: {
+          create: {
+            userId,
+            roleId: 1, // Set the creator as admin
+          },
+        },
+      },
+    });
+    res.status(201).json(community);
   } catch (error) {
     res.status(409).json({ message: "Error creating community" });
   }
@@ -76,14 +98,14 @@ export const getNotMemberCommunities = async (req: Request, res: Response) => {
   }
 };
 
-export const joinCommunity = async (req: Request, res: Response) => {
+export const joinCommunity = async (req: DecodedRequest, res: Response) => {
   try {
     const { id } = req.params;
 
     const community = await prisma.community.update({
       where: { id },
       data: {
-        CommunityRequests: { create: { userId: req.params.userId, requestedAt: new Date() } },
+        CommunityRequests: { create: { userId: req.userData!.userId, requestedAt: new Date() } },
       },
     });
 
@@ -93,9 +115,10 @@ export const joinCommunity = async (req: Request, res: Response) => {
   }
 };
 
-export const approveRequest = async (req: Request, res: Response) => {
+export const approveRequest = async (req: DecodedRequest, res: Response) => {
   try {
     const { requestId } = req.params;
+    const userId = req.userData!.userId;
 
     const request = await prisma.communityRequest.findUnique({
       where: { id: requestId },
@@ -104,6 +127,10 @@ export const approveRequest = async (req: Request, res: Response) => {
 
     if (!request) {
       return res.status(404).json({ message: "Request not found" });
+    }
+
+    if (!(await isAdminOrModerator(userId, request.communityId))) {
+      return res.status(403).json({ message: "You are not authorized to approve requests" });
     }
 
     const community = await prisma.community.update({
@@ -120,13 +147,13 @@ export const approveRequest = async (req: Request, res: Response) => {
   }
 };
 
-export const leaveCommunity = async (req: Request, res: Response) => {
+export const leaveCommunity = async (req: DecodedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const community = await prisma.community.update({
       where: { id },
       data: {
-        CommunityUsers: { deleteMany: { userId: req.params.userId } },
+        CommunityUsers: { deleteMany: { userId: req.userData!.userId } },
       },
     });
     res.status(200).json(community);
@@ -135,9 +162,14 @@ export const leaveCommunity = async (req: Request, res: Response) => {
   }
 };
 
-export const banUser = async (req: Request, res: Response) => {
+export const banUser = async (req: DecodedRequest, res: Response) => {
   try {
     const { userId, communityId } = req.params;
+    const requesterId = req.userData!.userId;
+
+    if (!(await isAdminOrModerator(requesterId, communityId))) {
+      return res.status(403).json({ message: "You are not authorized to ban users" });
+    }
 
     const community = await prisma.community.update({
       where: { id: communityId },
@@ -153,9 +185,15 @@ export const banUser = async (req: Request, res: Response) => {
   }
 };
 
-export const unbanUser = async (req: Request, res: Response) => {
+export const unbanUser = async (req: DecodedRequest, res: Response) => {
   try {
     const { userId, communityId } = req.params;
+    const requesterId = req.userData!.userId;
+
+    if (!(await isAdminOrModerator(requesterId, communityId))) {
+      return res.status(403).json({ message: "You are not authorized to unban users" });
+    }
+
     const community = await prisma.community.update({
       where: { id: communityId },
       data: {
@@ -185,7 +223,7 @@ export const reportPost = async (req: Request, res: Response) => {
 
       await prisma.report.update({
         where: { id: reportedPost.id },
-        data: { reportedBy: req.params.userId  },
+        data: { reportedBy: req.params.userId },
       });
 
       return res.status(200).json(reportedPost);
@@ -308,5 +346,30 @@ export const getCommunityMods = async (req: Request, res: Response) => {
     res.status(200).json(moderators);
   } catch (error) {
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const downgradeModerator = async (req: DecodedRequest, res: Response) => {
+  try {
+    const { communityId, userId } = req.params;
+    const requesterId = req.userData!.userId;
+
+    const requesterRole = await prisma.communityUser.findUnique({
+      where: { userId_communityId: { userId: requesterId, communityId } },
+      select: { roleId: true },
+    });
+
+    if (requesterRole?.roleId !== 1) {
+      return res.status(403).json({ message: "You are not authorized to downgrade moderators" });
+    }
+
+    const updatedUser = await prisma.communityUser.update({
+      where: { userId_communityId: { userId, communityId } },
+      data: { roleId: 3 },
+    });
+
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    res.status(500).json({ message: "Error downgrading moderator" });
   }
 };

@@ -10,6 +10,7 @@ import * as IconFontAwesome from "react-native-vector-icons/FontAwesome";
 import * as MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { styled } from "nativewind";
 import { useNavigation } from "@react-navigation/core";
+import AnimatedHamburgerButton from "../components/UtilityButton"; // Make sure to adjust the path
 
 const StyledView = styled(View);
 const StyledTouchableOpacity = styled(TouchableOpacity);
@@ -58,11 +59,6 @@ const CustomAddButton: React.FC<CustomAddButtonProps> = ({
     }
   };
 
-  const rotation = animation.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0deg", "45deg"],
-  });
-
   const buttonScale = animation.interpolate({
     inputRange: [0, 1],
     outputRange: [0, 1],
@@ -84,7 +80,7 @@ const CustomAddButton: React.FC<CustomAddButtonProps> = ({
             {
               translateY: animation.interpolate({
                 inputRange: [0, 1],
-                outputRange: [0, -size / 2],
+                outputRange: [0, -size / 1.5],
               }),
             },
             { scale: buttonScale },
@@ -102,7 +98,7 @@ const CustomAddButton: React.FC<CustomAddButtonProps> = ({
             {
               translateY: animation.interpolate({
                 inputRange: [0, 1],
-                outputRange: [0, -size / 2],
+                outputRange: [0, -size / 1.5],
               }),
             },
             { scale: buttonScale },
@@ -145,45 +141,7 @@ const CustomAddButton: React.FC<CustomAddButtonProps> = ({
           : "justify-center items-center absolute bottom-6 self-center z-99"
       }
     >
-      <StyledTouchableWithoutFeedback onPress={handlePress}>
-        <StyledAnimatedView
-          className="justify-center items-center"
-          style={{
-            backgroundColor: color,
-            width: size,
-            height: size,
-            borderRadius: size / 2,
-            transform: [{ rotate: rotation }],
-          }}
-        >
-          <StyledAnimatedView
-            style={{
-              position: "absolute",
-              opacity: animation.interpolate({
-                inputRange: [0, 1],
-                outputRange: [1, 0],
-              }),
-            }}
-          >
-            <MaterialCommunityIcons.default
-              name="weight-lifter"
-              size={30}
-              color="white"
-            />
-          </StyledAnimatedView>
-          <StyledAnimatedView
-            style={{
-              position: "absolute",
-              opacity: animation.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, 1],
-              }),
-            }}
-          >
-            <IconFontAwesome.default name="close" size={30} color="white" />
-          </StyledAnimatedView>
-        </StyledAnimatedView>
-      </StyledTouchableWithoutFeedback>
+      <AnimatedHamburgerButton active={isActive} onPress={handlePress} />
       {["left", "right", "top"].map((direction: any) => (
         <StyledAnimatedView
           key={direction}

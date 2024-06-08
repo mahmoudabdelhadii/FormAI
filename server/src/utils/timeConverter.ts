@@ -1,3 +1,5 @@
+import { format, toZonedTime } from 'date-fns-tz';
+
 /**
  * Formats a date string in the format of "Month Dayst/nd/rd/th, Year Hour:Minute AM/PM".
  * @param {string} createdAt - The date string to format (in ISO format).
@@ -6,12 +8,14 @@
  * formatCreatedAt("2023-04-18T13:22:43.115+00:00");
  * // returns "April 18th, 2023 7:22 PM"
  */
-
-const formatCreatedAt = (createdAt:string) => {
+const formatCreatedAt = (createdAt: string): string => {
   const date = new Date(createdAt);
-  const options:Intl.DateTimeFormatOptions = { month: "long", day: "numeric", year: "numeric" };
-  const dateString = date.toLocaleDateString("en-US", options );
-  const day = date.getDate();
+  const zonedDate = toZonedTime(date, 'UTC');
+
+  const dateString = format(zonedDate, "MMMM do, yyyy");
+  const day = date.getUTCDate();
+  const timeString = format(zonedDate, "h:mm a");
+
   let suffix;
   if (day % 10 === 1 && day !== 11) {
     suffix = "st";
@@ -22,17 +26,8 @@ const formatCreatedAt = (createdAt:string) => {
   } else {
     suffix = "th";
   }
-  const timeString = date.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "numeric",
-  });
-  return (
-    dateString.split(",")[0] +
-    suffix +
-    ", " +
-    date.getFullYear() +
-    " " +
-    timeString
-  );
+
+  return `${dateString.replace(/(\d+)(st|nd|rd|th)/, `$1${suffix}`)} ${timeString}`;
 };
+
 export default formatCreatedAt;

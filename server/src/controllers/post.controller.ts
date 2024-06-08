@@ -5,21 +5,52 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import dayjs from 'dayjs';
 dayjs.extend(relativeTime);
 import formatCreatedAt from '../utils/timeConverter';
-// Helper function to format post data
+import { DecodedRequest, DecodedToken,FileDeleteRequest,FileUploadRequest } from '../types/interfaces';
+import S3ClientSingleton from '../utils/s3Client';
+import { DeleteObjectCommand } from '@aws-sdk/client-s3';
 
+const s3 = S3ClientSingleton.getInstance();
+const BUCKET_NAME = process.env.AWS_BUCKET_NAME;
 const formatPost = (post: any) => ({
   ...post,
   createdAt: dayjs(post.createdAt).fromNow(),
 });
 
-// Helper function to format comments data
 const formatComments = (comments: any[]) =>
   comments.map((comment) => ({
     ...comment,
     createdAt: dayjs(comment.createdAt).fromNow(),
   }));
 
-// Get single post by ID
+
+  export const addPost = async (req: FileUploadRequest, res: Response) => {
+    try {
+      const { content, communityId, caption, visibility } = req.body;
+      const userId = req.userData!.userId;
+      const {location: fileUrl,type: fileType, filename} = req.fileInfo!
+      console.log(req.fileInfo)
+      if (!filename || !fileType) {
+        return res.status(400).json({ message: 'File URL and File Type are required' });
+      }
+  
+      const newPost = await prisma.post.create({
+        data: {
+          content,
+          fileUrl,
+          fileType,
+          communityId,
+          userId,
+          caption,
+          visibility,
+          createdAt: dayjs().toDate(),
+        },
+      });
+  
+      res.status(201).json({ message: 'Post created successfully', post: newPost });
+    } catch (error:any) {
+      res.status(500).json({ message: 'Error creating post', error: error.message });
+    }
+  };
 export const getPost = async (req: Request, res: Response) => {
   try {
     const postId = req.params.id;
@@ -45,26 +76,17 @@ export const getPost = async (req: Request, res: Response) => {
       },
     });
 
-  
-
-    // const savedByCount = await prisma.user.count({
-    //   where: { savedPosts: { has: postId } },
-    // });
-
     const report = await prisma.report.findFirst({
-      where: { postId:postId, reportedBy: userId },
+      where: { postId: postId, reportedBy: userId },
     });
 
-    // formattedPost.savedByCount = savedByCount;
-
-
     const formattedPost = {
-        ...post,
-        comments: formatComments(comments),
-        dateTime: post.createdAt?.toDateString(),
-        createdAt: dayjs(post.createdAt).fromNow(),
-        isReported: !!report,
-      };
+      ...post,
+      comments: formatComments(comments),
+      dateTime: post.createdAt?.toDateString(),
+      createdAt: dayjs(post.createdAt).fromNow(),
+      isReported: !!report,
+    };
     res.status(200).json(formattedPost);
   } catch (error) {
     res.status(500).json({
@@ -73,7 +95,6 @@ export const getPost = async (req: Request, res: Response) => {
   }
 };
 
-// Get all posts for the communities the user is a member of
 export const getPosts = async (req: Request, res: Response) => {
   try {
     const userId = req.params.userId;
@@ -92,6 +113,9 @@ export const getPosts = async (req: Request, res: Response) => {
     const posts = await prisma.post.findMany({
       where: {
         communityId: { in: communityIds },
+        createdAt: {
+          gte: dayjs().subtract(7, 'day').toDate(),
+        },
       },
       orderBy: { createdAt: 'desc' },
       include: {
@@ -107,6 +131,9 @@ export const getPosts = async (req: Request, res: Response) => {
     const totalPosts = await prisma.post.count({
       where: {
         communityId: { in: communityIds },
+        createdAt: {
+          gte: dayjs().subtract(7, 'day').toDate(),
+        },
       },
     });
 
@@ -118,11 +145,10 @@ export const getPosts = async (req: Request, res: Response) => {
   }
 };
 
-// Get all posts for a specific community
-export const getCommunityPosts = async (req: Request, res: Response) => {
+export const getCommunityPosts = async (req: DecodedRequest, res: Response) => {
   try {
     const communityId = req.params.communityId;
-    const userId = req.params.userId;
+    const userId = req.userData!.userId;
     const { limit = 10, skip = 0 } = req.query;
 
     const isMember = await prisma.community.findFirst({
@@ -141,7 +167,7 @@ export const getCommunityPosts = async (req: Request, res: Response) => {
     }
 
     const posts = await prisma.post.findMany({
-      where: { communityId: communityId },
+      where: { communityId: communityId, createdAt: { gte: dayjs().subtract(7, 'day').toDate() } },
       orderBy: { createdAt: 'desc' },
       include: {
         User: { select: { firstName: true, lastName: true, avatarUrl: true } },
@@ -154,7 +180,7 @@ export const getCommunityPosts = async (req: Request, res: Response) => {
     const formattedPosts = posts.map(formatPost);
 
     const totalCommunityPosts = await prisma.post.count({
-      where: { communityId: communityId },
+      where: { communityId: communityId, createdAt: { gte: dayjs().subtract(7, 'day').toDate() } },
     });
 
     res.status(200).json({ formattedPosts, totalCommunityPosts });
@@ -165,11 +191,10 @@ export const getCommunityPosts = async (req: Request, res: Response) => {
   }
 };
 
-// Get posts of the users that the current user is following in a given community
-export const getFollowingUsersPosts = async (req: Request, res: Response) => {
+export const getFollowingUsersPosts = async (req: DecodedRequest, res: Response) => {
   try {
     const communityId = req.params.id;
-    const userId = req.params.userId;
+    const userId = req.userData!.userId;
 
     const following = await prisma.relationship.findMany({
       where: { followerId: userId },
@@ -181,6 +206,7 @@ export const getFollowingUsersPosts = async (req: Request, res: Response) => {
       where: {
         userId: { in: followingIds },
         communityId: communityId,
+        createdAt: { gte: dayjs().subtract(1, 'day').toDate() },
       },
       orderBy: { createdAt: 'desc' },
       include: {
@@ -200,18 +226,30 @@ export const getFollowingUsersPosts = async (req: Request, res: Response) => {
   }
 };
 
-// Delete a post by ID
-export const deletePost = async (req: Request, res: Response) => {
+export const deletePost = async (req: DecodedRequest, res: Response) => {
   try {
     const postId = req.params.id;
+    const userId = req.userData!.userId;
+
 
     const post = await prisma.post.findUnique({ where: { id: postId } });
-
+    if (post && post.userId !== userId) {
+       
+      return res.status(401).json({
+        message: 'This user does not have permission to delete this post',
+      });
+    }
     if (!post) {
       return res.status(404).json({
         message: 'Post not found. It may have been deleted already',
       });
     }
+
+    const deleteParams = {
+      Bucket: BUCKET_NAME!,
+      Key: post.fileUrl,
+    };
+    await s3.send(new DeleteObjectCommand(deleteParams));
 
     await prisma.post.delete({ where: { id: postId } });
 
@@ -223,46 +261,44 @@ export const deletePost = async (req: Request, res: Response) => {
   }
 };
 
-// Like a post
-export const likePost = async (req: Request, res: Response) => {
-    try {
-      const postId = req.params.id;
-      const userId = req.params.userId;
-  
-      const updatedPost = await prisma.post.update({
-        where: { id: postId },
-        data: {
-          Likes: {
-            create: { userId: userId  },
-          },
-        },
-        include: {
-          User: { select: { firstName: true, lastName: true, avatarUrl: true } },
-          Community: { select: { name: true } },
-        },
-      });
-  
-      const formattedPost = await populatePost(updatedPost);
-  
-      res.status(200).json(formattedPost);
-    } catch (error) {
-      res.status(500).json({
-        message: 'Error liking post',
-      });
-    }
-  };
-
-// Unlike a post
-export const unlikePost = async (req: Request, res: Response) => {
+export const likePost = async (req: DecodedRequest, res: Response) => {
   try {
     const postId = req.params.id;
-    const userId = req.params.userId;
+    const userId = req.userData!.userId;
 
     const updatedPost = await prisma.post.update({
       where: { id: postId },
       data: {
         Likes: {
-            delete: { userId_postId: { postId: postId, userId: userId } },
+          create: { userId: userId },
+        },
+      },
+      include: {
+        User: { select: { firstName: true, lastName: true, avatarUrl: true } },
+        Community: { select: { name: true } },
+      },
+    });
+
+    const formattedPost = await populatePost(updatedPost);
+
+    res.status(200).json(formattedPost);
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error liking post',
+    });
+  }
+};
+
+export const unlikePost = async (req: DecodedRequest, res: Response) => {
+  try {
+    const postId = req.params.id;
+    const userId = req.userData!.userId;
+
+    const updatedPost = await prisma.post.update({
+      where: { id: postId },
+      data: {
+        Likes: {
+          delete: { userId_postId: { postId: postId, userId: userId } },
         },
       },
       include: {
@@ -281,11 +317,10 @@ export const unlikePost = async (req: Request, res: Response) => {
   }
 };
 
-// Add a comment to a post
-export const addComment = async (req: Request, res: Response) => {
+export const addComment = async (req: DecodedRequest, res: Response) => {
   try {
     const { content, postId } = req.body;
-    const userId = req.params.userId;
+    const userId = req.userData!.userId;
 
     const newComment = await prisma.comment.create({
       data: {
@@ -303,91 +338,6 @@ export const addComment = async (req: Request, res: Response) => {
   }
 };
 
-// Save a post
-// export const savePost = async (req: Request, res: Response) => {
-//   await saveOrUnsavePost(req, res, 'connect');
-// };
-
-// // Unsave a post
-// export const unsavePost = async (req: Request, res: Response) => {
-//   await saveOrUnsavePost(req, res, 'disconnect');
-// };
-
-// const saveOrUnsavePost = async (
-//   req: Request,
-//   res: Response,
-//   operation: 'connect' | 'disconnect'
-// ) => {
-//   try {
-//     const postId = req.params.id;
-//     const userId = req.userId;
-
-//     const updatedUserPost = await prisma.user.update({
-//       where: { id: userId },
-//       data: {
-//         savedPosts: {
-//           [operation]: { id: postId },
-//         },
-//       },
-//       select: {
-//         savedPosts: {
-//           include: {
-//             Community: { select: { name: true } },
-//           },
-//         },
-//       },
-//     });
-
-//     const formattedPosts = updatedUserPost.savedPosts.map(formatPost);
-
-//     res.status(200).json(formattedPosts);
-//   } catch (error) {
-//     res.status(500).json({
-//       message: 'Server error',
-//     });
-//   }
-// };
-
-// Get saved posts for the user
-// export const getSavedPosts = async (req: Request, res: Response) => {
-//   try {
-//     const userId = req.userId;
-
-//     const user = await prisma.user.findUnique({ where: { id: userId } });
-
-//     if (!user) {
-//       return res.status(404).json({
-//         message: 'User not found',
-//       });
-//     }
-
-//     const communityIds = await prisma.communityUser.findMany({
-//       where: { user: userId },
-//       select: { community: true },
-//     });
-
-//     const savedPosts = await prisma.post.findMany({
-//       where: {
-//         community: { in: communityIds.map((c) => c.community) },
-//         id: { in: user.savedPosts },
-//       },
-//       include: {
-//         User: { select: { firstName: true, lastName: true, avatarUrl: true } },
-//         Community: { select: { name: true } },
-//       },
-//     });
-
-//     const formattedPosts = savedPosts.map(formatPost);
-
-//     res.status(200).json(formattedPosts);
-//   } catch (error) {
-//     res.status(500).json({
-//       message: 'Server error',
-//     });
-//   }
-// };
-
-// Get public posts of a user
 export const getPublicPosts = async (req: Request, res: Response) => {
   try {
     const publicUserId = req.params.publicUserId;
@@ -420,6 +370,7 @@ export const getPublicPosts = async (req: Request, res: Response) => {
       where: {
         communityId: { in: commonCommunityIds.map((c) => c.communityId) },
         userId: publicUserId,
+        createdAt: { gte: dayjs().subtract(1, 'day').toDate() },
       },
       include: {
         User: { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
@@ -438,10 +389,6 @@ export const getPublicPosts = async (req: Request, res: Response) => {
 };
 
 const populatePost = async (post: any) => {
-//   const savedByCount = await prisma.user.count({
-//     where: { savedPosts: { has: post.id } },
-//   });
-
   return {
     ...post,
     createdAt: dayjs(post.createdAt).fromNow(),

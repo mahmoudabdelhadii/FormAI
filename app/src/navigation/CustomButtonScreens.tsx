@@ -1,7 +1,7 @@
 import { createStackNavigator } from "@react-navigation/stack";
-import HealthScreen from "../Screens/HealthScreen";
-import ActivityScreen from "../Screens/ActivityScreen";
-import MealScreen from "../Screens/MealsScreen";
+import HealthScreen from "../Screens/UtilityScreens/HealthScreen";
+import ActivityScreen from "../Screens/UtilityScreens/ActivityScreen";
+import MealScreen from "../Screens/UtilityScreens/MealsScreen";
 const HealthStack = createStackNavigator();
 function CustomButtonScreens() {
   return (

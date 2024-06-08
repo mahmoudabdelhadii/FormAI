@@ -1,11 +1,35 @@
 import {rateLimit } from 'express-rate-limit'
 const MESSAGE = "Too many requests, please try again later.";
 
-const createLimiter = (windowMs:number, max:number, message:string) => {
+/**
+ * Creates an express rate limiter middleware.
+ *
+ * @param windowMs {number} The time window in milliseconds during which
+ * the rate limit is enforced.
+ * @param max {number} The maximum number of requests allowed during the
+ * specified time window.
+ * @param message {string} The error message to be returned when the rate
+ * limit is exceeded.
+ *
+ * @returns {Function} An express middleware that enforces the specified
+ * rate limit.
+ */
+const createLimiter = (windowMs: number, max: number, message: string) => {
   return rateLimit({
+    /**
+     * The time window in milliseconds during which the rate limit is
+     * enforced.
+     */
     windowMs,
+    /**
+     * The maximum number of requests allowed during the specified
+     * time window.
+     */
     max,
-    message: { message: message },
+    /**
+     * The error message to be returned when the rate limit is exceeded.
+     */
+    message: { message },
   });
 };
 

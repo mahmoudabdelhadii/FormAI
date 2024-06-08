@@ -1,19 +1,24 @@
 import { Dimensions } from "react-native";
 
-export const calcWidth = (size) => size * Dimensions.get("window").width;
-export const calcHeight = (size) => size * Dimensions.get("window").height;
+export const calcWidth = (size: number) =>
+  size * Dimensions.get("window").width;
+export const calcHeight = (size: number) =>
+  size * Dimensions.get("window").height;
 
-export const getFocusedRouteNameFromState = (state) => {
-  if (!state || !state.routes || state.routes.length === 0) {
-    return null;
-  }
+function validateEmail(email: string): boolean {
+  const regex = /^[a-zA-Z0-9]+@[a-zA-Z0-9]+.[a-zA-Z0-9]+$/;
+  return regex.test(email) && email.trim().length > 0;
+}
 
-  const route = state.routes[state.index];
+function validatePassword(password: string): boolean {
+  return password.length >= 8 && password.trim().length > 0;
+}
 
-  // Dive into nested navigators if there are any
-  if (route.state) {
-    return getFocusedRouteNameFromState(route.state);
-  }
+function validateMatchPassword(
+  password: string,
+  confirmPassword: string
+): boolean {
+  return password.trim() === confirmPassword.trim();
+}
 
-  return route.name;
-};
+export { validateEmail, validatePassword, validateMatchPassword };

@@ -1,0 +1,807 @@
+openapi: 3.0.1
+info:
+  title: Community API
+  description: This API handles all community and context data related requests.
+  version: 1.0.0
+  contact:
+    name: <Your Name>
+servers:
+  - url: http://localhost:3000
+    description: Local server
+
+paths:
+  /community/communities:
+    get:
+      summary: Get all communities
+      description: Returns a list of all communities
+      responses:
+        '200':
+          description: A list of communities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Community'
+    post:
+      summary: Create a new community
+      security:
+        - bearerAuth: []
+      description: Creates a new community and sets the creator as an admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommunity'
+      responses:
+        '201':
+          description: Community created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Community'
+        '409':
+          description: Error creating community
+
+  /community/member-communities:
+    get:
+      summary: Get member communities
+      security:
+        - bearerAuth: []
+      description: Returns a list of communities the user is a member of
+      responses:
+        '200':
+          description: A list of member communities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Community'
+
+  /community/not-member-communities:
+    get:
+      summary: Get communities not joined by user
+      security:
+        - bearerAuth: []
+      description: Returns a list of communities the user has not joined
+      responses:
+        '200':
+          description: A list of communities not joined by user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Community'
+
+  /community/communities/{id}/join:
+    post:
+      summary: Join a community
+      security:
+        - bearerAuth: []
+      description: Request to join a community
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Joined community successfully
+
+  /community/requests/{requestId}/approve:
+    post:
+      summary: Approve a join request
+      security:
+        - bearerAuth: []
+      description: Approve a join request for a community
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Request approved successfully
+
+  /community/communities/{id}/leave:
+    post:
+      summary: Leave a community
+      security:
+        - bearerAuth: []
+      description: Leave a community
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Left community successfully
+
+  /community/communities/{communityId}/ban/{userToBanId}:
+    post:
+      summary: Ban a user from a community
+      security:
+        - bearerAuth: []
+      description: Ban a user from a community
+      parameters:
+        - name: communityId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userToBanId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User banned successfully
+
+  /community/communities/{communityId}/unban/{userToUnbanId}:
+    post:
+      summary: Unban a user from a community
+      security:
+        - bearerAuth: []
+      description: Unban a user from a community
+      parameters:
+        - name: communityId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userToUnbanId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User unbanned successfully
+
+  /community/report-post:
+    post:
+      summary: Report a post
+      security:
+        - bearerAuth: []
+      description: Report a post in a community
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportPost'
+      responses:
+        '200':
+          description: Post reported successfully
+
+  /community/reported-posts/{id}:
+    get:
+      summary: Get reported posts
+      security:
+        - bearerAuth: []
+      description: Get a list of reported posts in a community
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of reported posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReportedPost'
+
+  /community/reported-posts/{postId}:
+    delete:
+      summary: Remove a reported post
+      security:
+        - bearerAuth: []
+      description: Remove a reported post
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Reported post removed successfully
+
+  /community/communities/{id}/members:
+    get:
+      summary: Get community members
+      security:
+        - bearerAuth: []
+      description: Get a list of members in a community
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of community members
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+  /community/communities/{id}/mods:
+    get:
+      summary: Get community moderators
+      security:
+        - bearerAuth: []
+      description: Get a list of moderators in a community
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of community moderators
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+  /community/communities/{communityId}/downgrade/{userToDowngradeId}:
+    post:
+      summary: Downgrade a moderator to a user
+      security:
+        - bearerAuth: []
+      description: Downgrade a moderator to a regular user in a community
+      parameters:
+        - name: communityId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userToDowngradeId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Moderator downgraded successfully
+
+  /community/moderators/{communityId}:
+    get:
+      summary: Get community moderators
+      security:
+        - bearerAuth: []
+      description: Get a list of moderators for the given community
+      parameters:
+        - name: communityId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of community moderators
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+  /community/add-moderators:
+    patch:
+      summary: Add a user as a moderator
+      security:
+        - bearerAuth: []
+      description: Add a user as a moderator for the given community
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddModerator'
+      responses:
+        '200':
+          description: User added as moderator successfully
+
+  /auth/context-data/primary:
+    get:
+      summary: Get primary context data
+      security:
+        - bearerAuth: []
+      description: Get the context data for the current user, including information about the user's device, browser, and operating system.
+      responses:
+        '200':
+          description: A list of primary context data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContextData'
+
+  /auth/context-data/trusted:
+    get:
+      summary: Get trusted context data
+      security:
+        - bearerAuth: []
+      description: Get the trusted context data for the current user, including information about the user's device, browser, and operating system.
+      responses:
+        '200':
+          description: A list of trusted context data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContextData'
+
+  /auth/context-data/blocked:
+    get:
+      summary: Get blocked context data
+      security:
+        - bearerAuth: []
+      description: Get the blocked context data for the current user, including information about the devices and browsers that are blocked from signing in.
+      responses:
+        '200':
+          description: A list of blocked context data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContextData'
+
+  /auth/user-preferences:
+    get:
+      summary: Get user preferences
+      security:
+        - bearerAuth: []
+      description: Get the user preferences for the current user, including information about the user's preferred language and time zone.
+      responses:
+        '200':
+          description: A list of user preferences
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreferences'
+
+  /auth/context-data/{contextId}:
+    delete:
+      summary: Delete context data
+      security:
+        - bearerAuth: []
+      description: Delete context data for the current user.
+      parameters:
+        - name: contextId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Context data deleted successfully
+
+  /auth/context-data/block/{contextId}:
+    patch:
+      summary: Block context data
+      security:
+        - bearerAuth: []
+      description: Block context data for the current user.
+      parameters:
+        - name: contextId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Context data blocked successfully
+
+  /auth/context-data/unblock/{contextId}:
+    patch:
+      summary: Unblock context data
+      security:
+        - bearerAuth: []
+      description: Unblock context data for the current user.
+      parameters:
+        - name: contextId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Context data unblocked successfully
+
+  /auth/verify:
+    get:
+      summary: Verify email address
+      description: Verify an email address and add context data to the user's account.
+      responses:
+        '200':
+          description: Email verified successfully
+
+  /auth/verify-login:
+    get:
+      summary: Verify login credentials
+      description: Verify login credentials and add context data to the user's account.
+      responses:
+        '200':
+          description: Login verified successfully
+
+  /auth/block-login:
+    get:
+      summary: Block login attempt
+      description: Block a login attempt from the user's IP address if the login credentials are incorrect.
+      responses:
+        '200':
+          description: Login blocked successfully
+  /user/public-users/{id}:
+    get:
+      summary: Get public user by ID
+      security:
+        - bearerAuth: []
+      description: Get information about a public user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Public user data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /user/public-users:
+    get:
+      summary: Get public users
+      security:
+        - bearerAuth: []
+      description: Get a list of public users
+      responses:
+        '200':
+          description: A list of public users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+  /user/following:
+    get:
+      summary: Get following users
+      security:
+        - bearerAuth: []
+      description: Get a list of users the current user is following
+      responses:
+        '200':
+          description: A list of users the current user is following
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+  /user/{id}:
+    get:
+      summary: Get user by ID
+      security:
+        - bearerAuth: []
+      description: Get information about a user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+    put:
+      summary: Update user information
+      security:
+        - bearerAuth: []
+      description: Update information for the user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        '200':
+          description: User information updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /user/signup:
+    post:
+      summary: Sign up a new user
+      description: Sign up a new user and send verification email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSignup'
+      responses:
+        '200':
+          description: User signed up successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /user/refresh-token:
+    post:
+      summary: Refresh token
+      description: Refresh the authentication token
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+
+  /user/signin:
+    post:
+      summary: Sign in a user
+      description: Sign in a user and send login verification email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSignin'
+      responses:
+        '200':
+          description: User signed in successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /user/forgot-password:
+    post:
+      summary: Forgot password
+      description: Request password reset email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '200':
+          description: Password reset email sent successfully
+
+  /user/reset-password/{token}:
+    put:
+      summary: Reset password
+      description: Reset password using token
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: Password reset successfully
+
+  /user/logout:
+    post:
+      summary: Log out
+      description: Log out the current user
+      responses:
+        '200':
+          description: User logged out successfully
+
+  /user/{id}/follow:
+    patch:
+      summary: Follow a user
+      security:
+        - bearerAuth: []
+      description: Follow a user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User followed successfully
+
+  /user/{id}/unfollow:
+    patch:
+      summary: Unfollow a user
+      security:
+        - bearerAuth: []
+      description: Unfollow a user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User unfollowed successfully
+/health:
+    get:
+      summary: Health check
+      description: Check the health of the API
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+components:
+  schemas:
+    Community:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+
+    CreateCommunity:
+      type: object
+      required:
+        - name
+        - description
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+
+    ReportPost:
+      type: object
+      required:
+        - postId
+        - reportReason
+        - communityId
+      properties:
+        postId:
+          type: string
+        reportReason:
+          type: string
+        communityId:
+          type: string
+
+    ReportedPost:
+      type: object
+      properties:
+        id:
+          type: string
+        content:
+          type: string
+        fileUrl:
+          type: string
+        createdAt:
+          type: string
+        userId:
+          type: string
+        User:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        avatarUrl:
+          type: string
+
+    AddModerator:
+      type: object
+      required:
+        - communityId
+        - userId
+      properties:
+        communityId:
+          type: string
+        userId:
+          type: string
+
+    ContextData:
+      type: object
+      properties:
+        id:
+          type: string
+        device:
+          type: string
+        browser:
+          type: string
+        operatingSystem:
+          type: string
+        trusted:
+          type: boolean
+        blocked:
+          type: boolean
+
+    UserPreferences:
+      type: object
+      properties:
+        language:
+          type: string
+        timeZone:
+          type: string
+
+securitySchemes:
+  bearerAuth:
+    type: http
+    scheme: bearer
+    bearerFormat: JWT

@@ -1,5 +1,7 @@
 import prisma from "../utils/prisma"
 import { Request, Response } from 'express';
+
+
 export const getPublicUsers = async (req: Request, res: Response) => {
     const { userId} = req.params
     try {
@@ -36,9 +38,9 @@ export const getPublicUsers = async (req: Request, res: Response) => {
     }
   };
 
-  export const followUser = async (req: Request, res: Response) => {
+  export const followUser = async (req: DecodedRequest, res: Response) => {
     try {
-      const followerId = req.params.userId as string;
+      const followerId = req.userData!.userId as string;
       const followingId = req.params.id;
   
       const relationshipExists = await prisma.relationship.findUnique({
@@ -60,10 +62,13 @@ export const getPublicUsers = async (req: Request, res: Response) => {
   };
 
   import dayjs from 'dayjs';
+import { DecodedRequest, FileUploadRequest } from "../types/interfaces";
+import S3ClientSingleton from "../utils/s3Client";
+import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 
-export const getPublicUser = async (req: Request, res: Response) => {
+export const getPublicUser = async (req: DecodedRequest, res: Response) => {
   try {
-    const currentUserId = req.params.userId as string;
+    const currentUserId = req.userData!.userId as string;
     const userId = req.params.id;
 
     const user = await prisma.user.findUnique({
@@ -132,9 +137,9 @@ export const getPublicUser = async (req: Request, res: Response) => {
   }
 };
 
-export const unfollowUser = async (req: Request, res: Response) => {
+export const unfollowUser = async (req: DecodedRequest, res: Response) => {
   try {
-    const followerId = req.params.userId as string;
+    const followerId = req.userData!.userId as string;
     const followingId = req.params.id;
 
     const relationshipExists = await prisma.relationship.findUnique({
@@ -155,10 +160,10 @@ export const unfollowUser = async (req: Request, res: Response) => {
   }
 };
 
-export const getFollowingUsers = async (req: Request, res: Response) => {
+export const getFollowingUsers = async (req: DecodedRequest, res: Response) => {
   try {
     const relationships = await prisma.relationship.findMany({
-      where: { followerId: req.params.userId as string },
+      where: { followerId: req.userData!.userId as string },
       include: { followingUser: true },
     });
 
@@ -172,5 +177,66 @@ export const getFollowingUsers = async (req: Request, res: Response) => {
     res.status(200).json(followingUsers);
   } catch (error:any) {
     res.status(500).json({ message: 'Some error occurred while retrieving the following users', error: error.message });
+  }
+};
+
+
+export const uploadProfilePic = async (req: FileUploadRequest, res: Response) => {
+  try {
+    const userId = req.userData!.userId;
+    const { location: fileUrl, type: fileType, filename } = req.fileInfo!;
+
+    if (!filename || !fileType) {
+      return res.status(400).json({ message: 'File URL and File Type are required' });
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        avatarUrl: fileUrl,
+      },
+      select: {
+        avatarUrl: true,
+      }
+    });
+
+    res.status(200).json({ message: 'Profile picture uploaded successfully', user: updatedUser });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Error uploading profile picture', error: error.message });
+  }
+
+  
+};
+
+export const resetProfilePic = async (req: DecodedRequest, res: Response) => {
+  const s3 = S3ClientSingleton.getInstance();
+const BUCKET_NAME = process.env.AWS_BUCKET_NAME;
+  try {
+    const userId = req.userData!.userId;
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user || !user.avatarUrl) {
+      return res.status(404).json({
+        message: 'Profile picture not found or already reset',
+      });
+    }
+
+    const deleteParams = {
+      Bucket: BUCKET_NAME!,
+      Key: user.avatarUrl,
+    };
+
+    await s3.send(new DeleteObjectCommand(deleteParams));
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { avatarUrl: null },
+    });
+
+    res.status(200).json({ message: 'Profile picture reset successfully' });
+  } catch (error) {
+    res.status(404).json({
+      message: 'An error occurred while resetting the profile picture',
+    });
   }
 };

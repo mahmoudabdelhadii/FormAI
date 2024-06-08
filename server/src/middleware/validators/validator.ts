@@ -30,4 +30,6 @@ const validate = (schema: ZodSchema) => (req: Request, res: Response, next: Next
   // Export the middleware functions
   export const postValidator = validate(PostSchema);
   export const userValidator = validate(UserSchema);
+  export const passwordValidator = validate(passwordSchema);
+  export const emailValidator = validate(emailSchema);
   export const commentValidator = validate(CommentSchema);

@@ -24,8 +24,8 @@ function formatUserData(user: UserWithRelations | null) {
       age: user.age ? `${user.age} years old` : 'No age available',
     },
     communityMemberships: user.CommunityUser.map(cu => ({
-      communityId: cu.community,
-      role: cu.role,
+      communityId: cu.communityId,
+      role: cu.roleId,
       verifiedAt: cu.verifiedAt?.toISOString(),
     })),
     token: user.Token ? {
@@ -33,7 +33,7 @@ function formatUserData(user: UserWithRelations | null) {
       refreshToken: user.Token.refreshToken,
       accessToken: user.Token.accessToken,
       createdAt: user.Token.createdAt?.toISOString(),
-      salt: user.Token.salt,
+      
     } : null,
   };
 }

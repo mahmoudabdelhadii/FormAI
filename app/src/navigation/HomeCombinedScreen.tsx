@@ -1,6 +1,6 @@
 import React from "react";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
-import HomeFeed from "../Screens/HomeFeed";
+import HomeFeed from "../Screens/Home/HomeFeed";
 import MediaScreens from "./MediaScreens";
 import MessagingTab from "./MesaagingTab";
 

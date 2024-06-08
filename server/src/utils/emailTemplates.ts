@@ -50,4 +50,22 @@ const verifyLoginHTML = (
   </div>
 `;
 
-export  { verifyEmailHTML, verifyLoginHTML };
+const resetPasswordHTML = (name: string, resetLink: string) => `
+  <div style="max-width: 600px; margin: auto; background-color: #f4f4f4; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgb(104, 182, 255);">
+    <div style="background-color: transparent; padding: 20px; border-radius: 10px;">
+      <img src="https://formai-media.s3.amazonaws.com/other/logo-inverted.png" alt="FormAI Logo" style="background-color: transparent; display: block; margin: auto auto 20px; max-width: 50%;">
+      <p style="font-size: 18px; margin-bottom: 20px; text-align: center; color: #4b5563; font-weight: bold;">Password Reset Request</p>
+      <p style="font-size: 16px; margin-bottom: 20px; text-align: center; color: #4b5563;">Hello ${name},</p>
+      <p style="font-size: 16px; margin-bottom: 20px; text-align: center; color: #4b5563;">We received a request to reset your password. Please click the button below to reset your password:</p>
+      <div style="text-align: center; margin-bottom: 20px;">
+        <a href="${resetLink}" style="background-color: #048998; color: #ffffff; padding: 12px 25px; border-radius: 5px; text-decoration: none; display: inline-block; font-size: 16px; font-weight: bold;">Reset Password</a>
+      </div>
+      <p style="font-size: 14px; margin-bottom: 20px; text-align: center; color: #4b5563;">Please note that the link will expire in 30 minutes.</p>
+      <p style="font-size: 14px; margin-bottom: 20px; text-align: center; color: #4b5563;">If you did not request a password reset, please ignore this email. Your password will remain unchanged.</p>
+      <p style="font-size: 14px; margin-bottom: 20px; text-align: center; color: #4b5563;">If you have any questions or concerns, please contact our customer support team.</p>
+    </div>
+  </div>
+`;
+
+
+export  { verifyEmailHTML, verifyLoginHTML,resetPasswordHTML };

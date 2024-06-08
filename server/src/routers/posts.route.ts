@@ -4,7 +4,7 @@ import {
   getPublicPosts,
   getPosts,
   getPost,
-//   createPost,
+  addPost,
 //   confirmPost,
 //   rejectPost,
   deletePost,
@@ -17,7 +17,7 @@ import {
 //   unsavePost,
 //   getSavedPosts,
 //   clearPendingPosts,
-} from '../controllers/post.controller.js';
+} from '../controllers/post.controller';
 import {
   postValidator,
   commentValidator,
@@ -26,26 +26,32 @@ import {
   createPostLimiter,
   likeSaveLimiter,
   commentLimiter,
-} from '../middleware/limiter/limiter.js';
+} from '../middleware/limiter/limiter';
 
 // import postConfirmation from '../middlewares/post/postConfirmation.js';
 // import analyzeContent from '../services/analyzeContent.js';
 // import processPost from '../services/processPost.js';
-// import fileUpload from '../middlewares/post/fileUpload.js';
-import decodeToken from '../middleware/auth/decodeToken.js';
+import {s3Upload} from '../middleware/posts/dataUpload';
+import decodeToken from '../middleware/auth/decodeToken';
+import { setFileCategory } from '../middleware/setCatagory';
 
 const router = Router();
 const requireAuth = passport.authenticate('jwt', { session: false });
 
-router.use(requireAuth);
-router.use(decodeToken);
+// router.use(requireAuth);
+// router.use(decodeToken);
 
-router.get('/community/:communityId', getCommunityPosts);
-// router.get('/saved', getSavedPosts);
-router.get('/:publicUserId/userPosts', getPublicPosts);
-router.get('/:id/following', getFollowingUsersPosts);
-router.get('/:id', getPost);
-router.get('/', getPosts);
+router.get('/community/:communityId',requireAuth,
+decodeToken, getCommunityPosts);
+
+router.get('/:publicUserId/userPosts', requireAuth,
+decodeToken,getPublicPosts);
+router.get('/:id/following', requireAuth,
+decodeToken,getFollowingUsersPosts);
+router.get('/:id',requireAuth,
+decodeToken, getPost);
+router.get('/', requireAuth,
+decodeToken,getPosts);
 
 // router.post('/confirm/:confirmationToken', confirmPost);
 // router.post('/reject/:confirmationToken', rejectPost);
@@ -53,32 +59,31 @@ router.get('/', getPosts);
 router.post(
   '/:id/comment',
   commentLimiter,
+  requireAuth,
+  decodeToken,
   commentValidator,
-//   validatorHandler,
-//   analyzeContent,
   addComment
 );
 
-// router.post(
-//   '/',
-//   createPostLimiter,
-//   fileUpload,
-//   postValidator,
-//   validatorHandler,
-//   analyzeContent,
-//   processPost,
-//   postConfirmation,
-//   createPost
-// );
+router.post(
+  '/',
+  createPostLimiter,
+  requireAuth,
+  decodeToken,
+  setFileCategory,
+  s3Upload,
+  // postValidator,
+  addPost
+);
 
 // router.delete('/pending', clearPendingPosts);
-router.delete('/:id', deletePost);
+router.delete('/:id', requireAuth,
+decodeToken, deletePost);
 
 router.use(likeSaveLimiter);
-
-// router.patch('/:id/save', savePost);
-// router.patch('/:id/unsave', unsavePost);
-router.patch('/:id/like', likePost);
-router.patch('/:id/unlike', unlikePost);
+router.patch('/:id/like', requireAuth,
+decodeToken, likePost);
+router.patch('/:id/unlike', requireAuth,
+decodeToken, unlikePost);
 
 export default router;

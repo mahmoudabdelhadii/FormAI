@@ -11,5 +11,19 @@ else
     echo "INFO: skipping sourcing of secret envs."
 fi
 
+# Make sure the DATABASE_URL environment variable is set
+if [ -z "$DATABASE_URL" ]; then
+  echo "DATABASE_URL is not set. Exiting..."
+  exit 1
+fi
+
+# Print the DATABASE_URL for debugging purposes (remove this in production)
+echo "Using DATABASE_URL: $DATABASE_URL"
+
+# Any other setup or initialization tasks can go here
+
+exec "$@"
+
+
 echo "INFO: Starting the application..."
 NODE_ENV=production NODE_PORT=8080 node dist/index.js

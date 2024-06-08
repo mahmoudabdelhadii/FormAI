@@ -11,6 +11,9 @@ import { verifyContextData, types } from './auth.controller';
 import {hashPassword} from "../utils/createPassword"
 import { verifyPassword } from '../utils/verifyPassword';
 import * as crypto from "node:crypto"
+import { createTransport } from 'nodemailer';
+import { resetPasswordHTML } from '../utils/emailTemplates';
+import { passwordSchema } from '../models/user.model';
 dayjs.extend(duration);
 
 const LOG_TYPE = {
@@ -33,6 +36,11 @@ const MESSAGE = {
   CONTEXT_DATA_VERIFY_ERROR: 'Context data verification failed',
   MULTIPLE_ATTEMPT_WITHOUT_VERIFY: 'Multiple sign in attempts detected without verifying identity.',
   LOGOUT_SUCCESS: 'User has logged out successfully',
+  PASSWORD_RESET_REQUEST: 'Password reset request received',
+  PASSWORD_RESET_EMAIL_SENT: 'Password reset email sent',
+  PASSWORD_RESET_ERROR: 'Error occurred while processing password reset request',
+  INVALID_TOKEN: 'Invalid or expired password reset token',
+  PASSWORD_RESET_SUCCESS: 'Password reset successful',
 };
 
 interface CustomRequest extends Request {
@@ -132,7 +140,7 @@ export const signin = async (req: CustomRequest, res: Response, next: NextFuncti
     }
 
     const payload = { id: existingUser.id, email: existingUser.email };
-    const accessToken = sign(payload, process.env.SECRET as string, { expiresIn: '6h' });
+    const accessToken = sign(payload, process.env.SECRET as string, { expiresIn: '100d' });
     const refreshToken = sign(payload, process.env.REFRESH_SECRET as string, { expiresIn: '14d' });
 
     const existingToken = await prisma.token.findUnique({
@@ -326,7 +334,20 @@ export const getUser = async (req: Request, res: Response, next: NextFunction): 
 export const addUser = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   const { username,firstName,lastName, email, password, isConsentGiven } = req.body;
   try {
-    
+    const existingEmailUser = await prisma.user.findUnique({
+      where: { email },
+    });
+    if (existingEmailUser) {
+      return res.status(400).json({ message: 'Email is already in use, Please sign In' });
+    }
+
+    // Check if the username is already in use
+    const existingUsernameUser = await prisma.user.findUnique({
+      where: { username },
+    });
+    if (existingUsernameUser) {
+      return res.status(400).json({ message: 'Username is already in use' });
+    }
     // Hash the password
     const hashedPassword = await hashPassword(password);
 
@@ -402,40 +423,103 @@ export const updateInfo = async (req: Request, res: Response, next: NextFunction
   }
 };
 
-// export const getModProfile = async (req: Request, res: Response): Promise<any> => {
-//   try {
-//     const moderator = await prisma.user.findUnique({ where: { id: req.userId } });
-//     if (!moderator) {
-//       return res.status(404).json({ message: 'User not found' });
-//     }
 
-//     const moderatorInfo = {
-//       ...moderator,
-//       createdAt: moderator.createdAt.toLocaleString(),
-//     };
-//     delete moderatorInfo.password;
+export const forgotPassword = async (req: Request, res: Response): Promise<any> => {
+  const USER = process.env.EMAIL as string;
+  const PASS = process.env.PASSWORD as string;
+  const EMAIL_SERVICE = process.env.EMAIL_SERVICE as string;
+  const CLIENT_URL = process.env.CLIENT_URL as string;
 
-//     res.status(200).json({ moderatorInfo });
-//   } catch (err) {
-//     res.status(500).json({ message: 'Internal server error' });
-//   }
-// };
+  const { email } = req.body;
 
-// export const updateInfo = async (req: Request, res: Response): Promise<any> => {
-//   try {
-//     const { location, interests, bio } = req.body;
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
 
-//     const user = await prisma.user.update({
-//       where: { id: req.userId },
-//       data: { location, interests, bio },
-//     });
+    if (!user) {
+      return res.status(404).json({ message: 'No user found with that email address' });
+    }
 
-//     if (!user) {
-//       return res.status(404).json({ message: 'User not found' });
-//     }
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    const tokenExpires = new Date(Date.now() + 3600000); // Token expires in 1 hour
 
-//     res.status(200).json({ message: 'User info updated successfully' });
-//   } catch (err) {
-//     res.status(500).json({ message: 'Error updating user info' });
-//   }
-// };
+    await prisma.passwordReset.create({
+      data: {
+        userId: user.id,
+        token: hashedToken,
+        tokenExpires,
+      },
+    });
+
+    const resetLink = `${CLIENT_URL}/user/reset-password/${resetToken}`;
+  console.log(resetLink)
+    const transporter = createTransport({
+      service: EMAIL_SERVICE,
+      auth: {
+        user: USER,
+        pass: PASS,
+      },
+    });
+
+    const info = await transporter.sendMail({
+      from: `"FormAI" <${USER}>`,
+      to: email,
+      subject: 'Password Reset Request',
+      html: resetPasswordHTML(user.firstName, resetLink),
+    });
+
+    await prisma.email.create({
+      data: {
+        email,
+        verificationCode: resetToken,
+        messageId: info.messageId,
+        forId: 3,
+      },
+    });
+    await saveLogInfo(req, MESSAGE.PASSWORD_RESET_EMAIL_SENT, LOG_TYPE.SIGN_IN, LEVEL.INFO);
+    res.status(200).json({ message: 'Password reset email sent' });
+  } catch (err:any) {
+    await saveLogInfo(req, MESSAGE.PASSWORD_RESET_ERROR + err.message, LOG_TYPE.SIGN_IN, LEVEL.ERROR);
+    console.error('Could not send email. There could be an issue with the provided credentials or the email service.', err);
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};
+export const resetPassword = async (req: Request, res: Response): Promise<any> => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  try {
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+    const resetRecord = await prisma.passwordReset.findFirst({
+      where: {
+        token: hashedToken,
+        tokenExpires: { gt: new Date() },
+      },
+    });
+
+    if (!resetRecord) {
+      return res.status(400).json({ message: 'Token is invalid or has expired' });
+    }
+    passwordSchema.parse(password);
+    const hashedPassword = await hashPassword(password);
+
+    await prisma.user.update({
+      where: { id: resetRecord.userId },
+      data: {
+        password: hashedPassword,
+      },
+    });
+
+    await prisma.passwordReset.delete({
+      where: { id: resetRecord.id },
+    });
+
+    await saveLogInfo(req, MESSAGE.PASSWORD_RESET_SUCCESS, LOG_TYPE.SIGN_IN, LEVEL.INFO);
+
+    res.status(200).json({ message: 'Password has been reset' });
+  } catch (err:any) {
+    console.log(err);
+    await saveLogInfo(req, MESSAGE.SIGN_IN_ERROR + err.message, LOG_TYPE.SIGN_IN, LEVEL.ERROR);
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};

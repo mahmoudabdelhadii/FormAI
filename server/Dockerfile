@@ -20,6 +20,24 @@ ENV CRYPTO_KEY=${CRYPTO_KEY}
 ARG NODE_PORT=8080
 ENV NODE_PORT=${NODE_PORT}
 
+ARG EMAIL
+ENV EMAIL=${EMAIL}
+
+ARG PASSWORD
+ENV PASSWORD=${PASSWORD}
+
+ARG EMAIL_SERVICE
+ENV EMAIL_SERVICE=${EMAIL_SERVICE}
+
+ARG CLOUDFRONT_DOMAIN
+ENV CLOUDFRONT_DOMAIN=${CLOUDFRONT_DOMAIN}
+
+ARG CLOUDFRONT_KEY_PAIR_ID
+ENV CLOUDFRONT_KEY_PAIR_ID=${CLOUDFRONT_KEY_PAIR_ID}
+
+ARG CLOUDFRONT_PRIVATE_KEY
+ENV CLOUDFRONT_PRIVATE_KEY=${CLOUDFRONT_PRIVATE_KEY}
+
 # Copy package.json and package-lock.json (or npm-shrinkwrap.json)
 COPY package*.json ./
 
@@ -46,16 +64,35 @@ ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 
 ARG DATABASE_URL
-ARG REFRESH_SECRET
-ARG SECRET
-ARG CRYPTO_KEY
-# Repeat the process of setting environment variables
 ENV DATABASE_URL=${DATABASE_URL}
+
+ARG REFRESH_SECRET
 ENV REFRESH_SECRET=${REFRESH_SECRET}
+
+ARG SECRET
 ENV SECRET=${SECRET}
+
+ARG CRYPTO_KEY
 ENV CRYPTO_KEY=${CRYPTO_KEY}
 
-ENTRYPOINT echo $DATABASE_URL
+ARG EMAIL
+ENV EMAIL=${EMAIL}
+
+ARG PASSWORD
+ENV PASSWORD=${PASSWORD}
+
+ARG EMAIL_SERVICE
+ENV EMAIL_SERVICE=${EMAIL_SERVICE}
+
+ARG CLOUDFRONT_DOMAIN
+ENV CLOUDFRONT_DOMAIN=${CLOUDFRONT_DOMAIN}
+
+ARG CLOUDFRONT_KEY_PAIR_ID
+ENV CLOUDFRONT_KEY_PAIR_ID=${CLOUDFRONT_KEY_PAIR_ID}
+
+ARG CLOUDFRONT_PRIVATE_KEY
+ENV CLOUDFRONT_PRIVATE_KEY=${CLOUDFRONT_PRIVATE_KEY}
+
 # Set the working directory in the container
 WORKDIR /usr/src/server
 
@@ -73,14 +110,9 @@ COPY --from=development /usr/src/server/prisma ./prisma
 
 COPY --from=development /usr/src/server/node_modules/@prisma/client /usr/src/server/node_modules/@prisma/client
 COPY --from=development /usr/src/server/node_modules/.prisma /usr/src/server/node_modules/.prisma
-# Copy the entrypoint script
-COPY --from=development /usr/src/server/docker-entrypoint.sh ./docker-entrypoint.sh
 
 # Expose the port the app runs on
 EXPOSE 8080
-
-# Set the entrypoint script
-ENTRYPOINT ["docker-entrypoint.sh"]
 
 # Command to run the app
 CMD ["node", "dist/index.js"]

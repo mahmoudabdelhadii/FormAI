@@ -1,7 +1,7 @@
 import { z } from 'zod'
 // Schema for Token
 const TokenSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().uuid().optional(),
   userId: z.string().uuid(),
   refreshToken: z.string(),
   accessToken: z.string(),

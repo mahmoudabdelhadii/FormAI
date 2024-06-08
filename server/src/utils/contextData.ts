@@ -9,7 +9,7 @@ interface ContextData {
   device: string;
   deviceType: string;
 }
-const getIpFromHeaders = (req: Request): string => {
+export const getIpFromHeaders = (req: Request): string => {
   const forwardedFor = req.headers['x-forwarded-for'];
   if (Array.isArray(forwardedFor)) {
     return forwardedFor[0];
