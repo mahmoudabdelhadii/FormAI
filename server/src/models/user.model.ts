@@ -121,3 +121,4 @@ export const createUserSchema = UserSchema; // For create, all fields are requir
 export const updateUserSchema = UserSchema.partial();
 
 type User = z.infer<typeof UserSchema>;
+ 
