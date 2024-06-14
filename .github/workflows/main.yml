@@ -1,4 +1,4 @@
-name: CI/CD with terraform
+name: CI/CD with Terraform
 on:
   push:
     branches:
@@ -10,9 +10,6 @@ env:
   PRIVATE_SSH_KEY: ${{ secrets.AWS_SSH_KEY_PRIVATE }}
   PUBLIC_SSH_KEY: ${{ secrets.AWS_SSH_KEY_PUBLIC }}
   AWS_REGION: us-east-1
-  VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
-  HCP_CLIENT_SECRET: ${{ secrets.HCP_CLIENT_SECRET }}
-  HCP_CLIENT_ID: ${{ secrets.HCP_CLIENT_ID }}
   DATABASE_URL: ${{ secrets.DATABASE_URL }}
   SECRET: ${{ secrets.SECRET }}
   REFRESH_SECRET: ${{ secrets.REFRESH_SECRET }}
@@ -22,7 +19,9 @@ env:
   EMAIL_SERVICE: ${{ secrets.EMAIL_SERVICE }}
   CLOUDFRONT_DOMAIN: ${{ secrets.CLOUDFRONT_DOMAIN }}
   CLOUDFRONT_KEY_PAIR_ID: ${{ secrets.CLOUDFRONT_KEY_PAIR_ID }}
-  CLOUDFRONT_PRIVATE_KEY_BASE64: ${{ secrets.CLOUDFRONT_PRIVATE_KEY_BASE64 }}
+  CLOUDFRONT_PRIVATE_KEY_BASE64: ${{ secrets.CLOUDFRONT_PRIVATE_KEY }}
+  DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}
+  ROUTE53_ZONE_ID: ${{ secrets.ROUTE53_ZONE_ID }}
 
 jobs:
   deploy-infra:
@@ -31,37 +30,39 @@ jobs:
     outputs:
       SERVER_PUBLIC_IP: ${{ steps.set-ip.outputs.instance_public_ip }}
     steps: 
-      - name: checkout
+      - name: Checkout
         uses: actions/checkout@v4
-      - name: setup Terraform
+      - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_wrapper: false
-      - name: Terraform init
+      - name: Terraform Init
         id: init
-        run: terraform init -backend-config="bucket=$TF_STATE_BUCKET_NAME" -backend-config="region=us-east-1"
+        run: terraform init -backend-config="bucket=$TF_STATE_BUCKET_NAME" -backend-config="region=$AWS_REGION"
         working-directory: ./terraform
       - name: Terraform Validate
         id: validate
         uses: hashicorp/terraform-github-actions/validate@v0.3.7
-      - name: Terraform plan
+      - name: Terraform Plan
         id: plan
         run: |-
           terraform plan \
-          -var="region=us-east-1" \
+          -var="region=$AWS_REGION" \
           -var="public_key=$PUBLIC_SSH_KEY" \
           -var="private_key=$PRIVATE_SSH_KEY" \
           -var="key_name=deployer-key" \
+          -var="domain_name=$DOMAIN_NAME" \
+          -var="route53_zone_id=$ROUTE53_ZONE_ID" \
           -out=PLAN
         working-directory: ./terraform
-      - name: Terraform apply
+      - name: Terraform Apply
         id: apply
         run: terraform apply PLAN
         working-directory: ./terraform
-      - name: Set output
+      - name: Set Output
         id: set-ip
         run: |- 
-          echo "::set-output name=instance_public_ip::$(terraform output instance_public_ip)"
+          echo "::set-output name=instance_public_ip::$(terraform output -raw instance_public_ip)"
         working-directory: ./terraform
 
   deploy-app:
@@ -71,29 +72,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: set ip environment variable
-        run: echo SERVER_PUBLIC_IP=${{ needs.deploy-infra.outputs.SERVER_PUBLIC_IP }} >> $GITHUB_ENV
+      - name: Set IP Environment Variable
+        run: echo "SERVER_PUBLIC_IP=${{ needs.deploy-infra.outputs.SERVER_PUBLIC_IP }}" >> $GITHUB_ENV
       - name: Login to AWS ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-      - name: Use Vault Secrets
-        run: |
-          echo "Using Vault Address: ${{ secrets.VAULT_ADDR }}"
-          echo "Authenticating with Vault..."
-          sudo apt-get update
-          sudo apt-get install jq
-          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
-          echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
-          sudo apt update && sudo apt install vlt -y
-          export HCP_CLIENT_ID=$HCP_CLIENT_ID
-          export HCP_CLIENT_SECRET=$HCP_CLIENT_SECRET
-        env:
-          VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
-          HCP_CLIENT_ID: ${{ secrets.HCP_CLIENT_ID }}
-          HCP_CLIENT_SECRET: ${{ secrets.HCP_CLIENT_SECRET }}
       - name: Prepare CloudFront Private Key
         run: echo "$CLOUDFRONT_PRIVATE_KEY_BASE64" | base64 --decode > cloudfront_private_key.pem
-      - name: Build, Push docker image
+      - name: Build and Push Docker Image
         env:
           REGISTRY: "${{ steps.login-ecr.outputs.registry }}"
           REPOSITORY: formai
@@ -122,12 +108,12 @@ jobs:
           -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
         working-directory: ./server
-      - name: Deploy docker image to EC2
+      - name: Deploy Docker Image to EC2
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: formai
           IMAGE_TAG: ${{ github.sha }}
-          AWS_DEFAULT_REGION: us-east-1
+          AWS_DEFAULT_REGION: $AWS_REGION
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ env.SERVER_PUBLIC_IP }}
@@ -136,12 +122,12 @@ jobs:
           envs: PRIVATE_SSH_KEY,REGISTRY,REPOSITORY,IMAGE_TAG,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_REGION,AWS_DEFAULT_REGION
           script: |-
             sudo apt-get update
-            sudo apt-get install unzip
+            sudo apt-get install -y unzip
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
             unzip awscliv2.zip
             sudo ./aws/install
-            sudo apt-get install docker.io -y
-            sudo docker login -u AWS -p $(aws ecr get-login-password --region us-east-1) $REGISTRY
+            sudo apt-get install -y docker.io
+            sudo docker login -u AWS -p $(aws ecr get-login-password --region $AWS_REGION) $REGISTRY
             sudo docker stop myappcontainer || true
             sudo docker rm myappcontainer || true
             sudo docker pull "$REGISTRY/$REPOSITORY:$IMAGE_TAG"

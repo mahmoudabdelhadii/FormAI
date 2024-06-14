@@ -1,33 +1,60 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
-import AuthScreens from "./AuthScreens";
-import AppScreens from "./AppScreens";
-import HomeCombinedScreen from "./HomeCombinedScreen";
 import { Provider } from "react-redux";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import AuthScreens from "./AuthScreens";
+import AppScreens from "./AppScreens";
 import store from "../state-managment/store";
-export default function Home() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+import useAuth from "../Hooks/useAuth";
+import {
+  PreSplash,
+  PostSplash,
+} from "../Screens/AppInitialization/SplashScreen";
 
-  useEffect(() => {
-    // Here you would have logic to check if the user is authenticated
-    // For example, checking a token in async storage or making an API call
-    const checkAuth = async () => {
-      // Replace with your actual authentication check logic
-      const userIsAuthenticated = false; // Replace with actual check
-      setIsAuthenticated(userIsAuthenticated);
-    };
+const HomeContent = () => {
+  const { accessToken, status, isCheckingAuth } = useAuth();
+  const [preSplashDone, setPreSplashDone] = useState(false);
+  const [postSplashDone, setPostSplashDone] = useState(false);
 
-    checkAuth();
-  }, []);
+  if (isCheckingAuth) {
+    return (
+      <PreSplash
+        onAnimationComplete={() => setPreSplashDone(true)}
+        isFetchingUser={true}
+      />
+    );
+  }
+
+  if (!preSplashDone) {
+    return (
+      <PreSplash
+        onAnimationComplete={() => setPreSplashDone(true)}
+        isFetchingUser={false}
+      />
+    );
+  }
+
+  if (preSplashDone && !postSplashDone) {
+    return <PostSplash onAnimationComplete={() => setPostSplashDone(true)} />;
+  }
 
   return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <NavigationContainer>
+        {accessToken && status === "succeeded" ? (
+          <AppScreens />
+        ) : (
+          <AuthScreens />
+        )}
+      </NavigationContainer>
+    </GestureHandlerRootView>
+  );
+};
+
+export default function Home() {
+  return (
     <Provider store={store}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <NavigationContainer>
-          {isAuthenticated ? <AppScreens /> : <AuthScreens />}
-        </NavigationContainer>
-      </GestureHandlerRootView>
+      <HomeContent />
     </Provider>
   );
 }

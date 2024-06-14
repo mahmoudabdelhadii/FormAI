@@ -2,13 +2,23 @@ variable "region" {
     default = "us-east-1"  
 }
 
-variable "public_key" {
+variable "key_name" {
   
 }
 
-variable "private_key" {
-  
+variable "public_key" {
+  description = "The public key for SSH access"
 }
-variable "key_name" {
-  
+
+variable "private_key" {
+  description = "The private key for SSH access"
+  sensitive   = true
+}
+
+variable "domain_name" {
+  description = "The domain name to associate with the EC2 instance"
+}
+
+variable "route53_zone_id" {
+  description = "The ID of the Route 53 hosted zone"
 }

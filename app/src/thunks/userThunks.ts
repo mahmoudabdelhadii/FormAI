@@ -1,4 +1,4 @@
-// src/thunks/userThunks.ts
+// thunks/userThunks.ts
 import { AppDispatch } from "../state-managment/store";
 import { setLoading, setUser, setError } from "../state-managment/slices/userSlice";
 import type { User } from "../schemas/userSchema";
@@ -24,10 +24,12 @@ export const userLogin = (
       const params = new URLSearchParams();
       params.append('identifier', email);
       params.append('password', password);
-      const response = await axiosInstance.post<LoginResponse>('/user/signin', params, {headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },});
-      console.log(response);
+      const response = await axiosInstance.post<LoginResponse>('/user/signin', params, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
+    //   console.log(response);
       const data = response.data;
       if (data.accessToken) {
         dispatch(setUser({ user: data.user!, communities: data.communities! }));

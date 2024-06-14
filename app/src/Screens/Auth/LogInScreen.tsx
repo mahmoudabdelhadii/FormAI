@@ -1,10 +1,9 @@
-import React, { ReactNode, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   TextInput,
   Text,
   TouchableOpacity,
-  TouchableOpacityProps,
   SafeAreaView,
   KeyboardAvoidingView,
   Platform,
@@ -15,15 +14,14 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
-import { setLoading } from "../../state-managment/slices/loadingSlice";
 import { styled } from "nativewind";
 import Icon from "react-native-vector-icons/FontAwesome6";
 import AnimatedTextInput from "../../components/AnimatedTextInput";
-import AnimatedButton from "../../components/AnimatedButton";
 import LoadAndErrorButton from "../../components/LoadAndWaitButton";
-import { userLogin } from "../../thunks/userLogin";
+import { userLogin } from "../../thunks/userThunks";
 import { passwordSchema } from "../../schemas/userSchema";
 import { AppDispatch } from "../../state-managment/store";
+
 const StyledView = styled(View);
 const StyledSafeAreaView = styled(SafeAreaView);
 const StyledKeyboardAvoidingView = styled(KeyboardAvoidingView);
@@ -37,7 +35,7 @@ const LoginScreen: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const navigation = useNavigation();
   const [variant, setVariant] = useState<
     "neutral" | "loading" | "error" | "success"
@@ -53,8 +51,7 @@ const LoginScreen: React.FC = () => {
 
     setPasswordError("");
     setVariant("loading");
-    const result = await dispatch<any>(userLogin(email, password));
-    console.log(result);
+    const result = await dispatch(userLogin(email, password));
     if (result.success) {
       setVariant("success");
     } else {
@@ -63,7 +60,7 @@ const LoginScreen: React.FC = () => {
   };
 
   return (
-    <StyledSafeAreaView className="flex-1 bg-background ">
+    <StyledSafeAreaView className="flex-1 bg-background">
       <StyledKeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
@@ -110,7 +107,9 @@ const LoginScreen: React.FC = () => {
                     secureTextEntry
                   />
                   <StyledTouchableOpacity
-                    onPress={() => navigation.navigate("ForgotPassword")}
+                    onPress={() =>
+                      navigation.navigate("ForgotPassword" as never)
+                    }
                     className="flex justify-end items-end"
                   >
                     <StyledText className="text-md text-foreground ">
@@ -120,13 +119,7 @@ const LoginScreen: React.FC = () => {
 
                   <StyledTouchableOpacity
                     className="w-25 rounded-md bg-dodgerblue items-center mt-5"
-                    onPress={() => {
-                      if (password.length < 6) {
-                        setPasswordError("The password is too short");
-                      } else {
-                        setPasswordError("");
-                      }
-                    }}
+                    onPress={handleLogin}
                   >
                     <LoadAndErrorButton
                       initialText="Login"
@@ -142,7 +135,7 @@ const LoginScreen: React.FC = () => {
                 <StyledView className="w-[90vw] h-0.5 bg-border mb-3" />
                 <StyledView className="w-full justify-center items-center">
                   <StyledTouchableOpacity
-                    onPress={() => navigation.navigate("SignUp")}
+                    onPress={() => navigation.navigate("SignUp" as never)}
                     className="flex flex-row justify-center items-center gap-2"
                   >
                     <StyledText className="text-lg text-copy">
@@ -161,21 +154,5 @@ const LoginScreen: React.FC = () => {
     </StyledSafeAreaView>
   );
 };
-
-const SplashButton = ({ children, className, ...rest }: ButtonProps) => {
-  return (
-    <StyledTouchableOpacity
-      className={`rounded-md bg-gradient-to-br from-blue-400 to-blue-700 px-4 py-2 text-lg text-zinc-50 ring-2 ring-blue-500/50 ring-offset-2 ring-offset-zinc-950 transition-all hover:scale-[1.02] hover:ring-transparent active:scale-[0.98] active:ring-blue-500/70 ${className}`}
-      {...rest}
-    >
-      <StyledText className="text-zinc-50">{children}</StyledText>
-    </StyledTouchableOpacity>
-  );
-};
-
-type ButtonProps = {
-  children: React.ReactNode;
-  className?: string;
-} & TouchableOpacityProps;
 
 export default LoginScreen;
