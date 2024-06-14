@@ -127,6 +127,7 @@ jobs:
           host: ${{ env.SERVER_PUBLIC_IP }}
           username: ubuntu
           key: ${{ env.PRIVATE_SSH_KEY }}
+          envs: PRIVATE_SSH_KEY,REGISTRY,REPOSITORY,IMAGE_TAG,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_REGION,AWS_DEFAULT_REGION
           script: |-
             sudo apt-get update
             sudo apt-get install -y unzip
@@ -134,7 +135,7 @@ jobs:
             unzip awscliv2.zip
             sudo ./aws/install
             sudo apt-get install -y docker.io
-            sudo docker login -u AWS -p $(aws ecr get-login-password --region $AWS_DEFAULT_REGION) $REGISTRY
+            sudo docker login -u AWS -p $(aws ecr get-login-password --region $AWS_REGION) $REGISTRY
             sudo docker stop myappcontainer || true
             sudo docker rm myappcontainer || true
             sudo docker pull "$REGISTRY/$REPOSITORY:$IMAGE_TAG"
