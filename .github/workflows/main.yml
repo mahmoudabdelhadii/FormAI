@@ -1,8 +1,16 @@
 name: CI/CD with Terraform
+
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      deploy_infra:
+        description: "Deploy infrastructure (true/false)"
+        required: true
+        default: "false"
+
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -26,10 +34,11 @@ env:
 
 jobs:
   deploy-infra:
+    if: github.event.inputs.deploy_infra == 'true'
     runs-on: ubuntu-latest
     outputs:
       SERVER_PUBLIC_IP: ${{ steps.set-ip.outputs.instance_public_ip }}
-    steps: 
+    steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup Terraform
@@ -42,7 +51,8 @@ jobs:
         working-directory: ./terraform
       - name: Terraform Validate
         id: validate
-        uses: hashicorp/terraform-github-actions/validate@v0.3.7
+        run: terraform validate
+        working-directory: ./terraform
       - name: Terraform Plan
         id: plan
         run: |-
@@ -62,13 +72,12 @@ jobs:
         working-directory: ./terraform
       - name: Set Output
         id: set-ip
-        run: |- 
-          echo "::set-output name=instance_public_ip::$(terraform output -raw instance_public_ip)"
+        run: echo "::set-output name=instance_public_ip::$(terraform output -raw instance_public_ip)"
         working-directory: ./terraform
 
   deploy-app:
-    runs-on: ubuntu-latest
     needs: deploy-infra
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -119,7 +128,6 @@ jobs:
           host: ${{ env.SERVER_PUBLIC_IP }}
           username: ubuntu
           key: ${{ env.PRIVATE_SSH_KEY }}
-          envs: PRIVATE_SSH_KEY,REGISTRY,REPOSITORY,IMAGE_TAG,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_REGION,AWS_DEFAULT_REGION
           script: |-
             sudo apt-get update
             sudo apt-get install -y unzip
