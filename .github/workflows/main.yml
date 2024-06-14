@@ -26,7 +26,6 @@ env:
 
 jobs:
   deploy-infra:
-    if: contains(github.event.head_commit.message, 'AWS-DEPLOY:')
     runs-on: ubuntu-latest
     outputs:
       SERVER_PUBLIC_IP: ${{ steps.set-ip.outputs.instance_public_ip }}
@@ -68,7 +67,6 @@ jobs:
         working-directory: ./terraform
 
   deploy-app:
-    if: contains(github.event.head_commit.message, 'AWS-DEPLOY:')
     runs-on: ubuntu-latest
     needs: deploy-infra
     steps:
