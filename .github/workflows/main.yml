@@ -21,6 +21,7 @@ env:
   CLOUDFRONT_KEY_PAIR_ID: ${{ secrets.CLOUDFRONT_KEY_PAIR_ID }}
   CLOUDFRONT_PRIVATE_KEY_BASE64: ${{ secrets.CLOUDFRONT_PRIVATE_KEY }}
   DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}
+  SUBDOMAIN: ${{ secrets.SUBDOMAIN }}
   ROUTE53_ZONE_ID: ${{ secrets.ROUTE53_ZONE_ID }}
 
 jobs:
@@ -52,6 +53,7 @@ jobs:
           -var="private_key=$PRIVATE_SSH_KEY" \
           -var="key_name=deployer-key" \
           -var="domain_name=$DOMAIN_NAME" \
+          -var="subdomain=$SUBDOMAIN" \
           -var="route53_zone_id=$ROUTE53_ZONE_ID" \
           -out=PLAN
         working-directory: ./terraform

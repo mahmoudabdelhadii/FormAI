@@ -22,3 +22,7 @@ variable "domain_name" {
 variable "route53_zone_id" {
   description = "The ID of the Route 53 hosted zone"
 }
+
+variable "subdomain" {
+  description = "The subdomain to associate with the resources"
+}

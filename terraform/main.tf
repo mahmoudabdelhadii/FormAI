@@ -98,7 +98,7 @@ resource "aws_key_pair" "deployer" {
 
 # Create an ACM certificate
 resource "aws_acm_certificate" "cert" {
-  domain_name       = var.domain_name
+  domain_name       = "${var.subdomain}.${var.domain_name}"
   validation_method = "DNS"
 
   lifecycle {
@@ -144,10 +144,10 @@ resource "aws_cloudfront_distribution" "cdn" {
 
   enabled             = true
   is_ipv6_enabled     = true
-  comment             = "CloudFront distribution for ${var.domain_name}"
+  comment             = "CloudFront distribution for ${var.subdomain}.${var.domain_name}"
   default_root_object = "index.html"
 
-  aliases = [var.domain_name]
+  aliases = ["${var.subdomain}.${var.domain_name}"]
 
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD", "OPTIONS"]
@@ -182,7 +182,7 @@ resource "aws_cloudfront_distribution" "cdn" {
 # Update Route 53 to point to the CloudFront distribution
 resource "aws_route53_record" "www" {
   zone_id = var.route53_zone_id
-  name    = var.domain_name
+  name    = "${var.subdomain}.${var.domain_name}"
   type    = "A"
 
   alias {
