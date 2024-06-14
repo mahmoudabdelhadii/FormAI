@@ -34,7 +34,6 @@ env:
 
 jobs:
   deploy-infra:
-    if: github.event.inputs.deploy_infra == 'true'
     runs-on: ubuntu-latest
     outputs:
       SERVER_PUBLIC_IP: ${{ steps.set-ip.outputs.instance_public_ip }}
