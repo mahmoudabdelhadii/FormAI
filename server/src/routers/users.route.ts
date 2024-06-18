@@ -50,6 +50,7 @@ router.get("/public-users/:id", requireAuth, decodeToken, getPublicUser);
 router.get("/public-users", requireAuth, decodeToken, getPublicUsers);
 router.get("/following", requireAuth, decodeToken, getFollowingUsers);
 router.get("/:id", requireAuth, getUser);
+router.get("/", requireAuth, decodeToken, getUser);
 
 router.post(
   '/signup',

@@ -14,6 +14,7 @@ import * as crypto from "node:crypto"
 import { createTransport } from 'nodemailer';
 import { resetPasswordHTML } from '../utils/emailTemplates';
 import { passwordSchema } from '../models/user.model';
+import { DecodedRequest } from '../types/interfaces';
 dayjs.extend(duration);
 
 const LOG_TYPE = {
@@ -267,12 +268,81 @@ export const refreshToken = async (req: Request, res: Response): Promise<any> =>
   }
 };
 
-
-export const getUser = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+export const getUserById = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   try {
     const { id } = req.params
     const user = await prisma.user.findUnique({
       where: { id: id },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        createdAt: true,
+        firstName : true,
+        lastName  : true,
+        avatarUrl : true,
+        bio       : true,
+        isEmailVerified: true,
+        height : true,
+        weight : true,
+        age    : true,
+        // Exclude password field
+        password: false,
+      },
+    });
+    if(!user){
+      return res.status(500).json({ message: 'User not found' });
+    }
+    const totalPosts = await prisma.post.count({ where: { userId: user.id } });
+    const communities = await prisma.communityUser.findMany({
+      where: { userId: user.id },
+    });
+    const totalCommunities = communities.length;
+
+    const postCommunities = await prisma.post.findMany({
+      where: { userId: user.id },
+      distinct: ['communityId'],
+    });
+    const totalPostCommunities = postCommunities.length;
+
+    const createdAt = dayjs(user.createdAt);
+    const now = dayjs();
+    const durationObj = dayjs.duration(now.diff(createdAt));
+    const durationMinutes = durationObj.asMinutes();
+    const durationHours = durationObj.asHours();
+    const durationDays = durationObj.asDays();
+
+    let duration ="";
+    if (durationMinutes < 60) {
+      duration = `${Math.floor(durationMinutes)} minutes`;
+    } else if (durationHours < 24) {
+      duration = `${Math.floor(durationHours)} hours`;
+    } else if (durationDays < 365) {
+      duration = `${Math.floor(durationDays)} days`;
+    } else {
+      const durationYears = Math.floor(durationDays / 365);
+      duration = `${durationYears} years`;
+    }
+    const posts = await prisma.post.findMany({
+      where: { userId: user.id },
+      include: { Likes:true, Comments:true },
+      take: 20,
+      orderBy: { createdAt: 'desc' },
+    });
+
+    let userData = {...user, totalPosts,totalCommunities,totalPostCommunities, duration,posts}
+
+    res.status(200).json(userData);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getUser = async (req: DecodedRequest, res: Response, next: NextFunction): Promise<any> => {
+  try {
+    const { userId } = req.userData!
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
       select: {
         id: true,
         username: true,

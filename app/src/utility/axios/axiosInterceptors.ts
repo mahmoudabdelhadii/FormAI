@@ -24,6 +24,7 @@ const handleResponseError = (store: Store<RootState>, error: any) => async (orig
     if (refreshReduxToken.fulfilled.match(result)) {
       const state = store.getState();
       const newAccessToken = state.token.accessToken;
+      
       if (newAccessToken) {
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return axiosInstance(originalRequest);

@@ -3,6 +3,7 @@ import { AppDispatch } from "../state-managment/store";
 import { setLoading, setUser, setError } from "../state-managment/slices/userSlice";
 import type { User } from "../schemas/userSchema";
 import axiosInstance from "../utility/axios/axiosIntance";
+import { setToken } from "../state-managment/slices/tokenSlice";
 
 interface LoginResponse {
   success: boolean;
@@ -32,8 +33,10 @@ export const userLogin = (
     //   console.log(response);
       const data = response.data;
       if (data.accessToken) {
+
         dispatch(setUser({ user: data.user!, communities: data.communities! }));
         dispatch(setLoading(false));
+        dispatch(setToken({ accessToken: data.accessToken, refreshToken: data.refreshToken! })); // Set tokens
         return { success: true, user: data.user, communities: data.communities };
       } else {
         dispatch(setError(data.message || "Login failed"));
