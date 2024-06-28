@@ -85,6 +85,11 @@ app.use(function onError(err:any, req:any, res:any, next:any) {
   res.end(res.sentry + "\n");
 });
 
+app.get("/debug-sentry", function mainHandler(req, res) {
+  throw new Error("My first Sentry error!");
+});
+
+
 app.listen(port, () => console.log(`Server listening at http://localhost:${port}`));
 
 export default app;

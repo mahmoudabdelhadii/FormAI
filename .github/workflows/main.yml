@@ -31,6 +31,8 @@ env:
   DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}
   SUBDOMAIN: ${{ secrets.SUBDOMAIN }}
   ROUTE53_ZONE_ID: ${{ secrets.ROUTE53_ZONE_ID }}
+  SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
 jobs:
   deploy-infra:
@@ -101,6 +103,8 @@ jobs:
           EMAIL_SERVICE: ${{ secrets.EMAIL_SERVICE }}
           CLOUDFRONT_DOMAIN: ${{ secrets.CLOUDFRONT_DOMAIN }}
           CLOUDFRONT_KEY_PAIR_ID: ${{ secrets.CLOUDFRONT_KEY_PAIR_ID }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         run: |-
           docker build \
           --build-arg DATABASE_URL=$DATABASE_URL \
@@ -113,6 +117,8 @@ jobs:
           --build-arg CLOUDFRONT_DOMAIN=$CLOUDFRONT_DOMAIN \
           --build-arg CLOUDFRONT_KEY_PAIR_ID=$CLOUDFRONT_KEY_PAIR_ID \
           --build-arg CLOUDFRONT_PRIVATE_KEY="$(cat cloudfront_private_key.pem)" \
+          --build-arg SENTRY_DSN=$SENTRY_DSN \
+          --build-arg SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN \
           -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
         working-directory: ./server

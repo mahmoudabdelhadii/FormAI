@@ -4,18 +4,20 @@
   "private": true,
   "scripts": {
     "dev": "ts-node-dev --poll src/index.ts",
-    "build": "rimraf ./dist && tsc",
+    "build": "rimraf ./dist && tsc && npm run sentry:sourcemaps",
     "serve": "node dist/index.js",
     "start": "npm run build && npm run serve",
     "test": "jest",
     "prisma:pull": "npx prisma db pull",
-    "prisma:gen": "npx prisma generate"
+    "prisma:gen": "npx prisma generate",
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org ubc-1z --project node-express ./dist && sentry-cli sourcemaps upload --org ubc-1z --project node-express ./dist"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.556.0",
     "@aws-sdk/cloudfront-signer": "^3.576.0",
     "@aws-sdk/lib-storage": "^3.592.0",
     "@prisma/client": "^5.15.0",
+    "@sentry/cli": "^2.32.1",
     "@sentry/node": "^8.13.0",
     "@sentry/profiling-node": "^8.13.0",
     "argon2": "^0.40.1",
