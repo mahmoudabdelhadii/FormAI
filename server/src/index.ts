@@ -54,7 +54,7 @@ Sentry.init({
 
 // routers
 // default error handler
-Sentry.setupExpressErrorHandler(app);
+
 app.get("/search", search);
 app.use("/community", communityRouter);
 app.use('/auth', contextAuthRoutes);
@@ -67,6 +67,7 @@ app.get("/health", (req: Request, res: Response) => {
   res.status(200).json({ message: "ok" });
 });
 
+Sentry.setupExpressErrorHandler(app);
 // error handling for large file sizes
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   if (err.code === 'LIMIT_FILE_SIZE') {
