@@ -68,8 +68,8 @@ export const getCommunityModerators = async (request: Request, response: Respons
 
       res.status(200).json({ message: 'Moderator added' });
     } catch (error) {
-      console.log(error);
-      res.status(500).json({ message: 'Error adding moderator' });
+
+      res.status(500).json({ message: 'Error adding moderator: ' + error });
     }
   };
   

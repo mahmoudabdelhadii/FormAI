@@ -71,7 +71,7 @@ export const s3Upload = async (req: FileUploadRequest, res: Response, next: Next
       return res.status(400).json({ message: `Invalid file type for ${fileCategory}. Allowed types: ${allowedTypes.join(', ')}` });
     }
 
-    console.log('Category:', fileCategory, 'User:', userFolder);
+  
 
     const timestamp = Date.now();
     const filename = `${timestamp}_${info.filename}`;

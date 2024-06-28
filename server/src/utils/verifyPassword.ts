@@ -5,7 +5,7 @@ export async function verifyPassword(storedPassword: string, passwordAttempt: st
     try {
       // Parse the custom format {X-ARGON2}argon2id:iterations:memoryCost:parallelism:salt:hash
       const parts = storedPassword.split(':');
-      console.log(parts)
+      
       if (parts.length !== 6 || !parts[0].startsWith('{X-ARGON2}')) {
         return false; // Invalid format
       }
@@ -25,11 +25,10 @@ export async function verifyPassword(storedPassword: string, passwordAttempt: st
         memoryCost: memoryCost,
         parallelism: parallelism,
       });
-      console.log(hash)
-      console.log(storedPassword)
+     
       // Extract the generated hash part and compare it with the stored hash
       const generatedHashValue = hash.split('$')[5];
-      console.log(generatedHashValue)
+    
       return generatedHashValue === hashValue;
     } catch (error) {
       throw new Error('Error verifying password');

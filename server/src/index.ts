@@ -29,14 +29,13 @@ const app: Application = express();
 
 // plugins
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-app.use(logger(process.env.NODE_ENV === "production" ? "common" : "dev"));
+// app.use(logger(process.env.NODE_ENV === "production" ? "common" : "dev"));
 app.use(express.json());
 app.use(compression());
 app.use(requestIp.mw());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use('/static', express.static(path.join(__dirname, '../public')));
-console.log(path.join(__dirname, '../public'));
 app.use(cookieParser());
 app.use(passport.initialize());
 // app.use(cors()); // Add CORS middleware if needed

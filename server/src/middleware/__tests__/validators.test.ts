@@ -151,7 +151,6 @@ describe('Validation Middleware', () => {
 
       expect(response.status).toBe(400);
       expect(response.body.errors).toBeDefined();
-      console.log(response.body.errors);
       expect(response.body.errors[0].path).toBe('password');
     });
 

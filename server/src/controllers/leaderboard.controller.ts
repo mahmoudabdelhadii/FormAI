@@ -162,8 +162,6 @@ export const deleteLeaderboard = async (req: Request, res: Response) => {
       Key: entry.entryUrl!,
     }));
 
-    console.log(deleteObjects);
-
     if (deleteObjects.length > 0) {
       const deleteParams = {
         Bucket: BUCKET_NAME!,

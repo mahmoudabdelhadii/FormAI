@@ -147,8 +147,6 @@ export const signin = async (req: CustomRequest, res: Response, next: NextFuncti
     const existingToken = await prisma.token.findUnique({
       where: { userId: existingUser.id },
     });
-    console.log("existingUser",existingUser)
-    console.log("existingToken",existingToken)
 
     if (existingToken) {
       await prisma.token.update({
@@ -167,7 +165,7 @@ export const signin = async (req: CustomRequest, res: Response, next: NextFuncti
         },
       });
     }
-    console.log("done")
+  
     res.status(200).json({
       accessToken,
       refreshToken,
@@ -188,8 +186,8 @@ export const signin = async (req: CustomRequest, res: Response, next: NextFuncti
     });
   } catch (err: any) {
     await saveLogInfo(req, MESSAGE.SIGN_IN_ERROR + err.message, LOG_TYPE.SIGN_IN, LEVEL.ERROR);
-    console.error(err)
-    res.status(500).json({ message: 'Something went wrong' });
+    
+    res.status(500).json({ message: 'Something went wrong' + err });
   }
 };
 
@@ -233,7 +231,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<any> =>
     if (decoded && typeof decoded !== 'string') {
       tokenExpiry = decoded.exp;
       if (tokenExpiry) {
-        console.log("Token expiration time:", tokenExpiry);
+        
       } else {
         console.error("Expiration time not found in the token payload.");
       }
@@ -263,8 +261,8 @@ export const refreshToken = async (req: Request, res: Response): Promise<any> =>
       accessTokenUpdatedAt: new Date().toLocaleString(),
     });
   } catch (err) {
-    console.error(err)
-    res.status(500).json({ message: 'Internal server error' });
+  
+    res.status(500).json({ message: 'Internal server error: ' + err});
   }
 };
 
@@ -447,7 +445,7 @@ export const addUser = async (req: Request, res: Response, next: NextFunction): 
     if (!newUser) {
       throw new Error('Failed to add user');
     }
-    console.log("here")
+    
     // If consent is not given, return a success message
     if (isConsentGiven === false) {
       res.status(201).json({ message: 'User added successfully' });
@@ -529,7 +527,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<any> 
     });
 
     const resetLink = `${CLIENT_URL}/user/reset-password/${resetToken}`;
-  console.log(resetLink)
+  
     const transporter = createTransport({
       service: EMAIL_SERVICE,
       auth: {
@@ -595,8 +593,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<any> =
 
     res.status(200).json({ message: 'Password has been reset' });
   } catch (err:any) {
-    console.log(err);
     await saveLogInfo(req, MESSAGE.SIGN_IN_ERROR + err.message, LOG_TYPE.SIGN_IN, LEVEL.ERROR);
-    res.status(500).json({ message: 'Something went wrong' });
+    res.status(500).json({ message: 'Something went wrong: ' + err.message });
   }
 };

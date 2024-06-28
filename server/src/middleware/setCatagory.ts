@@ -3,7 +3,6 @@ import {  FileUploadRequest } from '../types/interfaces';
 
 export const setFileCategory = (req: FileUploadRequest, res: Response, next: NextFunction): any => {
   let fileCategory = '';
-    console.log(req.originalUrl)
   if (req.originalUrl.startsWith('/post')) {
     fileCategory = 'postsMedia';
   } else if (req.originalUrl.startsWith('/user')) {
