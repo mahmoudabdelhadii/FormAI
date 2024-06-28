@@ -53,6 +53,8 @@ Sentry.init({
 });
 
 // routers
+// default error handler
+Sentry.setupExpressErrorHandler(app);
 app.get("/search", search);
 app.use("/community", communityRouter);
 app.use('/auth', contextAuthRoutes);
@@ -73,8 +75,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   next(err);
 });
 
-// default error handler
-Sentry.setupExpressErrorHandler(app);
+
 
 // Optional fallthrough error handler
 app.use(function onError(err:any, req:any, res:any, next:any) {
