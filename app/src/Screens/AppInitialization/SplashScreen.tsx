@@ -4,7 +4,7 @@ import LottieView from "lottie-react-native";
 import { styled } from "nativewind";
 
 interface PreSplashProps {
-  onAnimationComplete: () => void; // Callback when animation finishes
+  onAnimationComplete?: () => void; // Callback when animation finishes
   isFetchingUser: boolean;
 }
 

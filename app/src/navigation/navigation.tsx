@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { Provider } from "react-redux";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -6,36 +6,31 @@ import AuthScreens from "./AuthScreens";
 import AppScreens from "./AppScreens";
 import store from "../state-managment/store";
 import useAuth from "../Hooks/useAuth";
-import {
-  PreSplash,
-  PostSplash,
-} from "../Screens/AppInitialization/SplashScreen";
+import { PreSplash } from "../Screens/AppInitialization/SplashScreen";
 
 const HomeContent = () => {
   const { accessToken, status, isCheckingAuth } = useAuth();
   const [preSplashDone, setPreSplashDone] = useState(false);
-  const [postSplashDone, setPostSplashDone] = useState(false);
 
-  if (isCheckingAuth) {
-    return (
-      <PreSplash
-        onAnimationComplete={() => setPreSplashDone(true)}
-        isFetchingUser={true}
-      />
-    );
-  }
+  useEffect(() => {
+    if (!isCheckingAuth && preSplashDone) {
+      // If checking auth is done and preSplash is done, you can navigate to the next screen
+    }
+  }, [isCheckingAuth, preSplashDone]);
 
   if (!preSplashDone) {
     return (
       <PreSplash
-        onAnimationComplete={() => setPreSplashDone(true)}
+        onAnimationComplete={() => {
+          setPreSplashDone(true);
+        }}
         isFetchingUser={false}
       />
     );
   }
 
-  if (preSplashDone && !postSplashDone) {
-    return <PostSplash onAnimationComplete={() => setPostSplashDone(true)} />;
+  if (isCheckingAuth) {
+    return <PreSplash isFetchingUser={true} />;
   }
 
   return (

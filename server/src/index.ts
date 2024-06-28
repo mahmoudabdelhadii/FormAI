@@ -18,6 +18,8 @@ import { search } from "./controllers/search.controller";
 import awsRouter from "./routers/auth.route";
 import postsRouter from "./routers/posts.route";
 import leaderboardRouter from "./routers/leaderboard.route";
+import * as Sentry from "@sentry/node"
+import {nodeProfilingIntegration} from "@sentry/profiling-node"
 
 const port = process.env.NODE_PORT || 8080;
 const swaggerDocument = YAML.load('swagger.yml');
@@ -38,6 +40,18 @@ console.log(path.join(__dirname, '../public'));
 app.use(cookieParser());
 app.use(passport.initialize());
 // app.use(cors()); // Add CORS middleware if needed
+
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  integrations: [
+    nodeProfilingIntegration(),
+  ],
+  // Performance Monitoring
+  tracesSampleRate: 1.0, //  Capture 100% of the transactions
+
+  // Set sampling rate for profiling - this is relative to tracesSampleRate
+  profilesSampleRate: 1.0,
+});
 
 // routers
 app.get("/search", search);
@@ -61,9 +75,14 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 });
 
 // default error handler
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  console.error(err.stack);
-  res.status(500).send('Something broke!');
+Sentry.setupExpressErrorHandler(app);
+
+// Optional fallthrough error handler
+app.use(function onError(err:any, req:any, res:any, next:any) {
+  // The error id is attached to `res.sentry` to be returned
+  // and optionally displayed to the user for support.
+  res.statusCode = 500;
+  res.end(res.sentry + "\n");
 });
 
 app.listen(port, () => console.log(`Server listening at http://localhost:${port}`));

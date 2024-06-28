@@ -6,6 +6,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { View } from "react-native";
 import HomeCombinedScreen from "../navigation/HomeCombinedScreen";
 import ProfileTab from "../Screens/ProfileTab";
+import ProfileSettingsDrawer from "../Screens/SettingsModal";
 import SearchTab from "../Screens/Search/SearchTab";
 import MessagingScreen from "../Screens/Home/MessagingScreen";
 import CameraScreen from "../Screens/Home/CameraScreen";

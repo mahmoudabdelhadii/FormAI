@@ -1,7 +1,17 @@
-import React, { useMemo } from "react";
-import { View, Text, Image, FlatList, ListRenderItem } from "react-native";
+import React, { useMemo, useState } from "react";
+import {
+  View,
+  Text,
+  Image,
+  FlatList,
+  ListRenderItem,
+  TouchableOpacity,
+  SafeAreaView,
+} from "react-native";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { styled } from "nativewind";
+import { useNavigation } from "@react-navigation/native";
+import SettingsModal from "../Screens/SettingsModal";
 
 interface Record {
   squat: string;
@@ -54,17 +64,14 @@ const user: User = {
       community: "Community A",
     },
     { id: "3", image: "https://example.com/lift3.jpg", public: true },
-    // More posts...
   ],
   achievements: [
     { id: "1", title: "First 200 lbs Squat", date: "2023-01-01" },
     { id: "2", title: "First 150 lbs Bench Press", date: "2023-02-01" },
-    // More achievements...
   ],
   leaderboards: [
     { community: "Community A", position: 1 },
     { community: "Community B", position: 3 },
-    // More leaderboard entries...
   ],
 };
 
@@ -74,6 +81,8 @@ const StyledView = styled(View);
 const StyledText = styled(Text);
 const StyledImage = styled(Image);
 const StyledFlatList = styled(FlatList);
+const StyledTouchableOpacity = styled(TouchableOpacity);
+const StyledSafeAreaView = styled(SafeAreaView);
 
 const PostsTab: React.FC = () => {
   const renderPost: ListRenderItem<Post> = ({ item }) => (
@@ -83,9 +92,11 @@ const PostsTab: React.FC = () => {
         className="w-24 h-24 rounded-md"
       />
       {item.public ? (
-        <StyledText className="text-xs text-center">{user.name}</StyledText>
+        <StyledText className="text-xs text-center text-copy">
+          {user.name}
+        </StyledText>
       ) : (
-        <StyledText className="text-xs text-center">
+        <StyledText className="text-xs text-center text-copy">
           {user.name} in {item.community}
         </StyledText>
       )}
@@ -105,9 +116,11 @@ const PostsTab: React.FC = () => {
 
 const LeaderboardsTab: React.FC = () => {
   const renderLeaderboard: ListRenderItem<Leaderboard> = ({ item }) => (
-    <StyledView className="p-2 border-b border-gray-300">
-      <StyledText className="text-lg font-bold">{item.community}</StyledText>
-      <StyledText className="text-sm text-gray-600">
+    <StyledView className="p-2 border-b border-border">
+      <StyledText className="text-lg font-bold text-primary">
+        {item.community}
+      </StyledText>
+      <StyledText className="text-sm text-copy-light">
         Position: {item.position}
       </StyledText>
     </StyledView>
@@ -133,6 +146,9 @@ const TabsComponent: React.FC = React.memo(() => (
 ));
 
 const ProfileTab: React.FC = () => {
+  const [isModalVisible, setModalVisible] = useState(false);
+  const navigation = useNavigation();
+
   const renderHeader = useMemo(
     () => (
       <StyledView>
@@ -141,25 +157,33 @@ const ProfileTab: React.FC = () => {
             source={{ uri: user.profilePicture }}
             className="w-24 h-24 rounded-full mb-2"
           />
-          <StyledText className="text-2xl font-bold">{user.name}</StyledText>
-          <StyledText className="text-base text-gray-600 text-center">
+          <StyledText className="text-2xl font-bold text-primary-dark">
+            {user.name}
+          </StyledText>
+          <StyledText className="text-base text-copy text-center">
             {user.bio}
           </StyledText>
         </StyledView>
         <StyledView className="mb-4">
-          <StyledText className="text-xl font-bold mb-2">
+          <StyledText className="text-xl font-bold text-primary mb-2">
             Personal Records
           </StyledText>
-          <StyledText className="text-base">
+          <StyledText className="text-base text-copy">
             Squat: {user.records.squat}
           </StyledText>
-          <StyledText className="text-base">
+          <StyledText className="text-base text-copy">
             Bench Press: {user.records.benchPress}
           </StyledText>
-          <StyledText className="text-base">
+          <StyledText className="text-base text-copy">
             Deadlift: {user.records.deadlift}
           </StyledText>
         </StyledView>
+        <StyledTouchableOpacity
+          className="absolute top-0 right-0 m-4"
+          onPress={() => setModalVisible(true)}
+        >
+          <Text style={{ fontSize: 24 }}>☰</Text>
+        </StyledTouchableOpacity>
         <TabsComponent />
       </StyledView>
     ),
@@ -167,12 +191,18 @@ const ProfileTab: React.FC = () => {
   );
 
   return (
-    <StyledFlatList
-      ListHeaderComponent={renderHeader}
-      data={[]}
-      renderItem={null}
-      keyExtractor={() => "key"}
-    />
+    <StyledSafeAreaView className="flex-1">
+      <StyledFlatList
+        ListHeaderComponent={renderHeader}
+        data={[]}
+        renderItem={null}
+        keyExtractor={() => "key"}
+      />
+      <SettingsModal
+        isVisible={isModalVisible}
+        onClose={() => setModalVisible(false)}
+      />
+    </StyledSafeAreaView>
   );
 };
 

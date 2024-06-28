@@ -44,7 +44,7 @@ const userSlice = createSlice({
     },
     setUser: (state, action) => {
       state.user = action.payload.user;
-      state.communities = action.payload.communities;
+      state.communities = action.payload.communities || []; // Ensure communities is an array
       state.isLoading = false;
       state.error = null;
     },

@@ -1,7 +1,7 @@
-// slices/tokenSlice.js
+// slices/tokenSlice.ts
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "../../utility/axios/axiosIntance";
+import axiosInstance from "../../utility/axios/axiosIntance";
 import { fetchUser } from "./userSlice"; // Import the fetchUser thunk
 
 interface TokenState {
@@ -41,7 +41,7 @@ export const refreshToken = createAsyncThunk(
     }
 
     try {
-      const response = await axios.post("/refresh-token", {
+      const response = await axiosInstance.post("/user/refresh-token", {
         refreshToken,
       });
 

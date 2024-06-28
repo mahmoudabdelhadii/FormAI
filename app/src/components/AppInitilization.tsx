@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  PreSplash,
-  PostSplash,
-} from "../Screens/AppInitialization/SplashScreen";
-import { View, ActivityIndicator, StyleSheet, Text } from "react-native";
+import { PreSplash } from "../Screens/AppInitialization/SplashScreen";
 
 interface AppInitializationProps {
   onInitializationComplete: () => void;
@@ -24,16 +20,8 @@ const AppInitialization: React.FC<AppInitializationProps> = ({
       // Simulate fetching user data
       setTimeout(() => {
         setIsFetchingUser(false);
-        setCurrentStage("postSplash"); // Transition to PostSplash after fetching is done
-      }, 100); // Simulate fetching delay
-    }
-  }, [currentStage]);
-
-  useEffect(() => {
-    if (currentStage === "postSplash") {
-      setTimeout(() => {
         onInitializationComplete(); // Proceed to the main app
-      }, 100); // Brief display of PostSplash before transitioning
+      }, 100); // Simulate fetching delay
     }
   }, [currentStage, onInitializationComplete]);
 
@@ -48,8 +36,6 @@ const AppInitialization: React.FC<AppInitializationProps> = ({
           isFetchingUser={isFetchingUser}
         />
       )}
-
-      {currentStage === "postSplash" && <PostSplash />}
     </>
   );
 };

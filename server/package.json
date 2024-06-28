@@ -16,6 +16,8 @@
     "@aws-sdk/cloudfront-signer": "^3.576.0",
     "@aws-sdk/lib-storage": "^3.592.0",
     "@prisma/client": "^5.15.0",
+    "@sentry/node": "^8.13.0",
+    "@sentry/profiling-node": "^8.13.0",
     "argon2": "^0.40.1",
     "bcrypt": "^5.1.1",
     "busboy": "^1.6.0",
