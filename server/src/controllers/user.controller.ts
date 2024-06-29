@@ -255,13 +255,17 @@ export const refreshToken = async (req: Request, res: Response): Promise<any> =>
 
     const payload = { id: existingUser.id, email: existingUser.email };
     const newAccessToken = sign(payload, process.env.SECRET as string, { expiresIn: '6h' });
-    const newRefreshToken = sign(payload, process.env.REFRESH_SECRET as string, { expiresIn: '7d' });
+    const newRefreshToken = sign(payload, process.env.REFRESH_SECRET as string, { expiresIn: '14d' });
 
+    const accessTokenExpiresAt = new Date(Date.now() + 6 * 60 * 60 * 1000); // 6 hours
+    const newrefreshTokenExpiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000); // 14 days
     await prisma.token.update({
       where: { id: existingToken.id },
       data: {
         accessToken: newAccessToken,
         refreshToken: newRefreshToken,
+        accessTokenExpiresAt: accessTokenExpiresAt,
+        refreshTokenExpiresAt: newrefreshTokenExpiresAt
       },
     });
 
@@ -269,6 +273,8 @@ export const refreshToken = async (req: Request, res: Response): Promise<any> =>
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
       accessTokenUpdatedAt: new Date().toLocaleString(),
+      accessTokenExpiresAt: accessTokenExpiresAt.toLocaleString(),
+      refreshTokenExpiresAt: newrefreshTokenExpiresAt.toLocaleString(),
     });
   } catch (err) {
   

@@ -10,6 +10,8 @@ interface LoginResponse {
   user?: User;
   accessToken?: string;
   refreshToken?: string;
+  accessTokenExpiresAt: string;
+  refreshTokenExpiresAt: string;
   communities?: string[];
   message?: string;
 }
@@ -34,7 +36,11 @@ export const userLogin = (
         await AsyncStorage.setItem('accessToken', data.accessToken);
         await AsyncStorage.setItem('refreshToken', data.refreshToken);
         dispatch(setUser({ user: data.user!, communities: data.communities || [] })); // Ensure communities is an array
-        dispatch(setToken({ accessToken: data.accessToken, refreshToken: data.refreshToken }));
+        dispatch(setToken({
+          accessToken: data.accessToken, refreshToken: data.refreshToken,
+          accessTokenExpiresAt: data.accessTokenExpiresAt,
+          refreshTokenExpiresAt: data.refreshTokenExpiresAt
+        }));
         dispatch(setLoading(false));
         return { success: true, user: data.user, communities: data.communities };
       } else {
@@ -63,7 +69,11 @@ export const refreshToken = () => {
         const { accessToken, refreshToken: newRefreshToken } = response.data;
         await AsyncStorage.setItem('accessToken', accessToken);
         await AsyncStorage.setItem('refreshToken', newRefreshToken);
-        dispatch(setToken({ accessToken, refreshToken: newRefreshToken }));
+        dispatch(setToken({
+          accessToken, refreshToken: newRefreshToken,
+          accessTokenExpiresAt: "",
+          refreshTokenExpiresAt: ""
+        }));
         return true;
       } catch (error: any) {
         retryCount++;
