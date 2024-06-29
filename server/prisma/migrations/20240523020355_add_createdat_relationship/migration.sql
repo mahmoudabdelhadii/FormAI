@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "Relationship" ADD COLUMN     "createdAt" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP;
