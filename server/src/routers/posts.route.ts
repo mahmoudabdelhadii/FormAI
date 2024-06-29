@@ -44,7 +44,8 @@ const requireAuth = passport.authenticate('jwt', { session: false });
 
 router.get('/community/:communityId',requireAuth,
 decodeToken, getCommunityPosts);
-
+router.get('/feed', requireAuth,
+  decodeToken,getFeed);
 router.get('/:publicUserId/userPosts', requireAuth,
 decodeToken,getPublicPosts);
 router.get('/:id/following', requireAuth,
@@ -54,8 +55,7 @@ decodeToken, getPost);
 router.get('/', requireAuth,
 decodeToken,getPosts);
 
-router.get('/feed', requireAuth,
-  decodeToken,getFeed);
+
 
 // router.post('/confirm/:confirmationToken', confirmPost);
 // router.post('/reject/:confirmationToken', rejectPost);
