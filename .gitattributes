@@ -1,0 +1,43 @@
+# Set default behavior, in case users don't have core.autocrlf set.
+* text=auto
+
+# Declare files that will always have CRLF line endings on checkout.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Declare files that will always have LF line endings on checkout.
+*.sh text eol=lf
+
+# Denote all text files that should have LF line endings.
+*.c text
+*.cpp text
+*.cs text
+*.h text
+*.java text
+*.js text
+*.jsx text
+*.json text
+*.md text
+*.php text
+*.py text
+*.rb text
+*.ts text
+*.tsx text
+*.xml text
+*.yml text
+*.yaml text
+
+# Mark certain file types as binary.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.mov binary
+*.mp4 binary
+*.mp3 binary
+*.wav binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.tar binary

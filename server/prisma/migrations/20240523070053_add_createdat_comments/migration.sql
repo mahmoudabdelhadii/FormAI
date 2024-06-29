@@ -1,0 +1,13 @@
+-- AlterTable
+ALTER TABLE "Comment" ADD COLUMN     "createdAt" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+-- AlterTable
+ALTER TABLE "PendingPost" ADD COLUMN     "createdAt" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "fileType" VARCHAR NOT NULL DEFAULT 'image/jpeg',
+ADD COLUMN     "visibility" "PostVisibility" NOT NULL DEFAULT 'PUBLIC';
+
+-- AlterTable
+ALTER TABLE "Post" ALTER COLUMN "createdAt" DROP NOT NULL;
+
+-- AlterTable
+ALTER TABLE "Report" ALTER COLUMN "community" DROP NOT NULL;
