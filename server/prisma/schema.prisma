@@ -177,6 +177,8 @@ model Token {
   refreshToken String   @unique @db.VarChar
   accessToken  String   @unique @db.VarChar
   createdAt    DateTime? @default(now()) @db.Timestamp(6)
+  accessTokenExpiresAt    DateTime @default("1970-01-01T00:00:00.000Z") @db.Timestamp(6)
+  refreshTokenExpiresAt    DateTime @default("1970-01-01T00:00:00.000Z") @db.Timestamp(6)
   User         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
@@ -194,6 +196,7 @@ model User {
   height          Float?
   weight          Float?
   age             Int?
+  dateOfBirth             DateTime @default("1900-01-01T00:00:00.000Z")
   gender          String?        @db.VarChar @default("")
   CommunityUser   CommunityUser[]
    BannedUsers      BannedUsers[]

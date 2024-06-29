@@ -13,6 +13,7 @@ const attachTokenToRequest = (store: Store<RootState>) => (config: any) => {
   return config;
 };
 
+// Handle response errors
 const handleResponseError = (store: Store<RootState>, error: any) => async (originalRequest: any) => {
   if (!error.response) {
     console.error('Network error or server is down:', error.message);
@@ -39,6 +40,7 @@ const handleResponseError = (store: Store<RootState>, error: any) => async (orig
   return Promise.reject(error);
 };
 
+// Setup interceptors
 export const setupInterceptors = (store: Store<RootState>) => {
   axiosInstance.interceptors.request.use(attachTokenToRequest(store), (error) => Promise.reject(error));
 

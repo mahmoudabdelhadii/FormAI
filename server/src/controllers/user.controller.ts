@@ -141,7 +141,7 @@ export const signin = async (req: CustomRequest, res: Response, next: NextFuncti
     }
 
     const payload = { id: existingUser.id, email: existingUser.email };
-    const accessToken = sign(payload, process.env.SECRET as string, { expiresIn: '100d' });
+    const accessToken = sign(payload, process.env.SECRET as string, { expiresIn: '6h' });
     const refreshToken = sign(payload, process.env.REFRESH_SECRET as string, { expiresIn: '14d' });
 
     const existingToken = await prisma.token.findUnique({
