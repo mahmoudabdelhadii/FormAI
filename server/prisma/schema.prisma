@@ -196,7 +196,7 @@ model User {
   height          Float?
   weight          Float?
   age             Int?
-  dateOfBirth             DateTime @default("1900-01-01T00:00:00.000Z")
+  dateOfBirth     DateTime? @default("1900-01-01T00:00:00.000Z")
   gender          String?        @db.VarChar @default("")
   CommunityUser   CommunityUser[]
    BannedUsers      BannedUsers[]

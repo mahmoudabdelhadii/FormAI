@@ -144,6 +144,9 @@ export const signin = async (req: CustomRequest, res: Response, next: NextFuncti
     const accessToken = sign(payload, process.env.SECRET as string, { expiresIn: '6h' });
     const refreshToken = sign(payload, process.env.REFRESH_SECRET as string, { expiresIn: '14d' });
 
+    const accessTokenExpiresAt = new Date(Date.now() + 6 * 60 * 60 * 1000); // 6 hours
+const refreshTokenExpiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000); // 14 days
+
     const existingToken = await prisma.token.findUnique({
       where: { userId: existingUser.id },
     });
@@ -154,6 +157,8 @@ export const signin = async (req: CustomRequest, res: Response, next: NextFuncti
         data: {
           accessToken,
           refreshToken,
+          accessTokenExpiresAt,
+      refreshTokenExpiresAt,
         },
       });
     } else {
@@ -162,6 +167,8 @@ export const signin = async (req: CustomRequest, res: Response, next: NextFuncti
           userId: existingUser.id,
           refreshToken,
           accessToken,
+          accessTokenExpiresAt,
+      refreshTokenExpiresAt,
         },
       });
     }
@@ -170,6 +177,8 @@ export const signin = async (req: CustomRequest, res: Response, next: NextFuncti
       accessToken,
       refreshToken,
       accessTokenUpdatedAt: new Date().toISOString(),
+      accessTokenExpiresAt: accessTokenExpiresAt.toISOString(),
+  refreshTokenExpiresAt: refreshTokenExpiresAt.toISOString(),
       user: {
         id: existingUser.id,
         firstName: existingUser.firstName,
@@ -180,6 +189,7 @@ export const signin = async (req: CustomRequest, res: Response, next: NextFuncti
         bio: existingUser.bio,
         weight: existingUser.weight,
         height: existingUser.height,
+        dateOfBirth: existingUser.dateOfBirth?.toISOString(),
         
 
       },

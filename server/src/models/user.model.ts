@@ -97,6 +97,7 @@ const isEmailVerifiedSchema = z.boolean().default(false);
 const heightSchema = z.number().optional();
 const weightSchema = z.number().optional();
 const ageSchema = z.number().int().optional();
+const dateOfBirthSchema = z.date().optional();
 
 // Combine individual schemas into UserSchema
 const UserSchema = z.object({
@@ -113,6 +114,7 @@ const UserSchema = z.object({
   height: heightSchema,
   weight: weightSchema,
   age: ageSchema,
+  dateOfBirth: dateOfBirthSchema,
 });
 
 export {idSchema, usernameSchema, passwordSchema, emailSchema, firstNameSchema, lastNameSchema,  UserSchema};

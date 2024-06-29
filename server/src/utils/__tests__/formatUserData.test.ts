@@ -25,6 +25,7 @@ describe('formatUserData', () => {
         weight: 75,
         age: 30,
         gender: 'male',
+        dateOfBirth: new Date('1990-01-01T00:00:00Z'),
         CommunityUser: [
           {
             id: 'communityUser1',
@@ -40,6 +41,8 @@ describe('formatUserData', () => {
           refreshToken: 'refresh-token',
           accessToken: 'access-token',
           createdAt: new Date('2022-01-01T00:00:00Z'),
+          accessTokenExpiresAt: new Date('2022-01-01T00:00:00Z'),
+          refreshTokenExpiresAt: new Date('2022-01-01T00:00:00Z'),
         },
       };
   
@@ -69,6 +72,8 @@ describe('formatUserData', () => {
           refreshToken: 'refresh-token',
           accessToken: 'access-token',
           createdAt: '2022-01-01T00:00:00.000Z',
+          accessTokenExpiresAt: '2022-01-01T00:00:00.000Z',
+          refreshTokenExpiresAt: '2022-01-01T00:00:00.000Z',
         },
       };
   
@@ -94,6 +99,7 @@ describe('formatUserData', () => {
         weight: null,
         age: null,
         gender: null,
+        dateOfBirth: null,
         CommunityUser: [],
         Token: null,
       };
