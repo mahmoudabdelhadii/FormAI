@@ -17,7 +17,7 @@ const generateSignedUrl = async(objectPath: string, expireTime: number = 3600): 
   const domain = process.env.CLOUDFRONT_DOMAIN; // Hard-coded CloudFront domain
   const keyPairId = process.env.CLOUDFRONT_KEY_PAIR_ID; // Key pair ID from environment variable
   const privateKeyPath = process.env.CLOUDFRONT_PRIVATE_KEY_PATH; // Path to the private key file from environment variable
-  const privateKey = process.env.CLOUDFRONT_PRIVATE_KEY; // Private key from environment variable
+  const privateKey = process.env.CLOUDFRONT_PRIVATE_KEY!.replace(/\\n/g, '\n'); // Private key from environment variable
 
   if (!keyPairId) {
     throw new Error('Environment variable CLOUDFRONT_KEY_PAIR_ID must be set.');
